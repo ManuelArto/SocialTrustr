@@ -1,0 +1,12 @@
+type NewsCreated @entity(immutable: true) {
+  id: Bytes!
+  NewsSharing_id: BigInt! # uint256
+  sender: Bytes! # address
+  title: String! # string
+  ipfsCid: String! # string
+  chatName: String! # string
+  parentNews: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

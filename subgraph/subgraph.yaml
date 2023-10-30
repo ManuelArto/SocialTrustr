@@ -1,0 +1,24 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: NewsSharing
+    network: mainnet
+    source:
+      address: "0x4d7011d4B4497c1cd45B0aa7BB99C8Da228fc24B"
+      abi: NewsSharing
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - NewsCreated
+      abis:
+        - name: NewsSharing
+          file: ./abis/NewsSharing.json
+      eventHandlers:
+        - event: NewsCreated(indexed uint256,indexed address,string,string,string,uint256)
+          handler: handleNewsCreated
+      file: ./src/news-sharing.ts
