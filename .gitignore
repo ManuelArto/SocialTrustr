@@ -12,3 +12,7 @@ docs/
 
 # Dotenv file
 .env
+
+# Ignore subgraph folders
+node_modules/
+generated/

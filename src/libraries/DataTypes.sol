@@ -10,5 +10,26 @@ library DataTypes {
         string chatName;
         address sharer;
     }
+
+    enum EvaluationStatus {
+        NotStarted,
+        NotVerified,
+        Evaluating,
+        Evaluated
+    }
+
+    struct Evaluation {
+        bool evaluation;
+        uint confidence;
+    }
+
+    struct NewsValidation {
+        address initiator;
+        uint deadline;
+        EvaluationStatus status;
+        Evaluation finalEvaluation;
+        mapping (address => Evaluation) evaluations;
+        uint evaluationsCount;
+    }
    
 }
