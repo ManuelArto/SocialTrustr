@@ -5,7 +5,7 @@ import "../../src/libraries/DataTypes.sol";
 import "../../src/libraries/Events.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
-import {DeployNewsSharing} from "../../script/DeployNewsSharing.s.sol";
+import {DeployScript} from "../../script/DeployScript.s.sol";
 
 contract NewsSharingTest is Test {
     NewsSharing newsSharing;
@@ -15,8 +15,8 @@ contract NewsSharingTest is Test {
     string public constant CHATNAME = "CHATNAME";
 
     function setUp() external {
-        DeployNewsSharing deployer = new DeployNewsSharing();
-        newsSharing = deployer.run();
+        DeployScript deployer = new DeployScript();
+        (newsSharing, ) = deployer.run();
     }
 
     function testUserCanShareNews() public {

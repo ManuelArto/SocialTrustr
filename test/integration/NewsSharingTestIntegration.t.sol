@@ -4,8 +4,8 @@ pragma solidity ^0.8.21;
 
 import {Test, console} from "forge-std/Test.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
-import {DeployNewsSharing} from "../../script/DeployNewsSharing.s.sol";
-import {ShareNews, GetNews} from "../../script/Interactions.s.sol";
+import {DeployScript} from "../../script/DeployScript.s.sol";
+import {ShareNews, GetNews} from "../../script/InteractionsNewsSharing.s.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
 import "../../src/libraries/DataTypes.sol";
 
@@ -17,8 +17,8 @@ contract IntegrationsTest is StdCheats, Test {
     string public constant CHATNAME = "CHATNAME";
 
     function setUp() external {
-        DeployNewsSharing deployer = new DeployNewsSharing();
-        newsSharing = deployer.run();
+        DeployScript deployer = new DeployScript();
+        (newsSharing, ) = deployer.run();
     }
 
     function testUserCanShareAndGetNews() public {

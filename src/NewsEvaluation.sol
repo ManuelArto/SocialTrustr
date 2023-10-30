@@ -14,9 +14,7 @@ contract NewsEvaluation {
     /* Functions */
 
     function startNewsValidation(uint newsId) public {
-        DataTypes.NewsValidation storage newsValidation = s_newsValidations[
-            newsId
-        ];
+        DataTypes.NewsValidation storage newsValidation = s_newsValidations[newsId];
 
         if (newsValidation.status != DataTypes.EvaluationStatus.NotStarted) {
             revert Errors.NewsEvaluation_NewsAlreadyValidated();
@@ -34,9 +32,7 @@ contract NewsEvaluation {
         bool evaluation,
         uint confidence
     ) public {
-        DataTypes.NewsValidation storage newsValidation = s_newsValidations[
-            newsId
-        ];
+        DataTypes.NewsValidation storage newsValidation = s_newsValidations[newsId];
 
         if (newsValidation.status != DataTypes.EvaluationStatus.Evaluating) {
             revert Errors.NewsEvaluation_NewsValidationNotStarted();

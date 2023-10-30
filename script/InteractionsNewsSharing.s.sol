@@ -40,6 +40,7 @@ contract GetNews is Script {
         news = newsSharing.getNews(id);
         vm.stopBroadcast();
         
+        console.log("Sharer: %s", news.sharer);
         console.log("Title: %s", news.title);
         console.log("IPFS CID: %s", news.ipfsCid);
         console.log("Chat Name: %s", news.chatName);

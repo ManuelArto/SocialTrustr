@@ -40,10 +40,19 @@ NETWORK_ARGS := --rpc-url http://localhost:8545 --private-key $(DEFAULT_ANVIL_KE
 # endif
 
 deploy:
-	@forge script script/DeployNewsSharing.s.sol:DeployNewsSharing $(NETWORK_ARGS)
+	@forge script script/DeployScript.s.sol:DeployScript $(NETWORK_ARGS)
 
 shareNews:
-	@forge script script/Interactions.s.sol:ShareNews --sig "run(string, string, string)" $(ARGS) $(NETWORK_ARGS)
+	@forge script script/InteractionsNewsSharing.s.sol:ShareNews --sig "run(string, string, string)" $(ARGS) $(NETWORK_ARGS)
 
 getNews:
-	@forge script script/Interactions.s.sol:GetNews --sig "run(uint)" $(ARGS) $(NETWORK_ARGS)
+	@forge script script/InteractionsNewsSharing.s.sol:GetNews --sig "run(uint)" $(ARGS) $(NETWORK_ARGS)
+
+startNewsValidation:
+	@forge script script/InteractionsNewsEvaluation.s.sol:StartNewsValidation --sig "run(uint)" $(ARGS) $(NETWORK_ARGS)
+
+evaluateNews:
+	@forge script script/InteractionsNewsEvaluation.s.sol:EvaluateNews --sig "run(uint, bool, uint)" $(ARGS) $(NETWORK_ARGS)
+
+getNewsValidation:
+	@forge script script/InteractionsNewsEvaluation.s.sol:GetNewsValidation --sig "run(uint)" $(ARGS) $(NETWORK_ARGS)
