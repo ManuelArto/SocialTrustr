@@ -1,7 +1,11 @@
 {
   "mainnet": {
     "NewsSharing": {
-      "address": "0x4d7011d4B4497c1cd45B0aa7BB99C8Da228fc24B",
+      "address": "",
+      "startBlock": 0
+    },
+    "NewsEvaluation": {
+      "address": "",
       "startBlock": 0
     }
   }

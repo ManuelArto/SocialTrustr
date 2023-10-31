@@ -1,11 +1,28 @@
-type NewsCreated @entity(immutable: true) {
-  id: Bytes!
-  NewsSharing_id: BigInt! # uint256
-  sender: Bytes! # address
-  title: String! # string
-  ipfsCid: String! # string
-  chatName: String! # string
-  parentNews: BigInt! # uint256
+enum EvaluationStatus {
+  NotStarted,
+  NotVerified,
+  Evaluating,
+  Evaluated
+}
+
+type Evaluation @entity {
+  id: ID!
+  evaluation: Boolean
+  confidence: BigInt
+  status: EvaluationStatus!
+}
+
+type NewsData @entity {
+  id: ID!
+  sender: Bytes!
+  title: String!
+  ipfsCid: String!
+  chatName: String!
+  parentNews: NewsData
+  isForwaded: Boolean!
+  evaluation: Evaluation!
+  forwarded: [NewsData!]
+  # block transaction infos
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
