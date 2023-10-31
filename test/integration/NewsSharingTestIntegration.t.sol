@@ -23,7 +23,7 @@ contract IntegrationsTest is StdCheats, Test {
 
     function testUserCanShareAndGetNews() public {
         ShareNews shareNews = new ShareNews();
-        shareNews.shareNews(address(newsSharing), TITLE, IPFSCID, CHATNAME);
+        shareNews.shareNews(address(newsSharing), TITLE, IPFSCID, CHATNAME, 0);
 
         GetNews getNews = new GetNews();
         DataTypes.News memory news = getNews.getNews(address(newsSharing), 1);

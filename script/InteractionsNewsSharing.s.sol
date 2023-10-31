@@ -11,11 +11,12 @@ contract ShareNews is Script {
         address mostRecentlyDeployed,
         string calldata title,
         string calldata ipfsCid,
-        string calldata chatName
+        string calldata chatName,
+        uint parentId
     ) public {
         vm.startBroadcast();
         NewsSharing newsSharing = NewsSharing(payable(mostRecentlyDeployed));
-        uint newsId = newsSharing.createNews(title, ipfsCid, chatName, 0);
+        uint newsId = newsSharing.createNews(title, ipfsCid, chatName, parentId);
         vm.stopBroadcast();
         console.log("News ID: %s", newsId);
     }
@@ -23,13 +24,14 @@ contract ShareNews is Script {
     function run(
         string calldata title,
         string calldata ipfsCid,
-        string calldata chatName
+        string calldata chatName,
+        uint parentId
     ) external {
         address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment(
             "NewsSharing",
             block.chainid
         );
-        shareNews(mostRecentlyDeployed, title, ipfsCid, chatName);
+        shareNews(mostRecentlyDeployed, title, ipfsCid, chatName, parentId);
     }
 }
 

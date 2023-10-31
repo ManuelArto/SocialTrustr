@@ -1,4 +1,4 @@
-import { BigInt, store } from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts";
 
 import { NewsCreated as NewsCreatedEvent } from "../generated/NewsSharing/NewsSharing"
 import { NewsData, Evaluation } from "../generated/schema"
@@ -29,7 +29,7 @@ export function handleNewsCreated(event: NewsCreatedEvent): void {
 }
 
 function updateParentForwardedNews(news: NewsData, parentId: BigInt): void {
-  let parentNews: NewsData = (store.get("NewsData", parentId.toString()) as NewsData)
+  let parentNews: NewsData = NewsData.load(parentId.toString())!
   
   let forwarded = parentNews.forwarded
   forwarded!.push(news.id)

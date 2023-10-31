@@ -47,7 +47,7 @@ deploy:
 	@forge script script/DeployScript.s.sol:DeployScript $(NETWORK_ARGS)
 
 shareNews:
-	@forge script script/InteractionsNewsSharing.s.sol:ShareNews --sig "run(string, string, string)" $(ARGS) $(NETWORK_ARGS)
+	@forge script script/InteractionsNewsSharing.s.sol:ShareNews --sig "run(string, string, string, uint)" $(ARGS) $(NETWORK_ARGS)
 
 getNews:
 	@forge script script/InteractionsNewsSharing.s.sol:GetNews --sig "run(uint)" $(ARGS) $(NETWORK_ARGS)
