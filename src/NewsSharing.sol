@@ -31,6 +31,10 @@ contract NewsSharing {
 
     /** Getter Functions */
 
+    function getTotalNews() public view returns (uint lenght) {
+        lenght = s_news.length - 1;
+    }
+
     function getNews(uint index) public view returns (DataTypes.News memory news) {
         news = s_news[index];
     }

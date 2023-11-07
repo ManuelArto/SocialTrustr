@@ -33,6 +33,14 @@ contract NewsSharingTest is Test {
         assertEq(news.chatName, "");
     }
 
+    function testUserCanGetTotalNews() public {
+        uint id = newsSharing.createNews(TITLE, IPFSCID, CHATNAME, 0);
+        assertEq(id, 1);
+
+        uint length = newsSharing.getTotalNews();
+        assertEq(length, 1);
+    }
+
     function testCorrectlyShareNews() public {
         newsSharing.createNews(TITLE, IPFSCID, CHATNAME, 0);
         DataTypes.News memory news = newsSharing.getNews(1);
