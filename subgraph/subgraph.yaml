@@ -6,7 +6,7 @@ dataSources:
     name: NewsSharing
     network: mainnet
     source:
-      address: "0x0FAF080543c42E51e6c470feA7E8d5417c8cCb8C"
+      address: "0x33757B5FC136c81fC0EBf31Ae424b5E2aB0dD000"
       abi: NewsSharing
       startBlock: 0
     mapping:
@@ -14,7 +14,7 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - NewsData
+        - NewsEntry
         - Evaluation
       abis:
         - name: NewsSharing
@@ -27,7 +27,7 @@ dataSources:
     name: NewsEvaluation
     network: mainnet
     source:
-      address: "0xA2c44dbB2a181301fA5d3FA6c178B9F539A7952f"
+      address: "0x4b7a050711c9d99aB01fcf8d68777bfA9A3590D3"
       abi: NewsEvaluation
       startBlock: 0
     mapping:
@@ -35,7 +35,7 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - NewsData
+        - NewsEntry
         - Evaluation
       abis:
         - name: NewsEvaluation

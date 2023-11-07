@@ -1,11 +1,11 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 
 import { NewsCreated as NewsCreatedEvent } from "../generated/NewsSharing/NewsSharing"
-import { NewsData, Evaluation } from "../generated/schema"
+import { NewsEntry, Evaluation } from "../generated/schema"
 
 
 export function handleNewsCreated(event: NewsCreatedEvent): void {
-  let news = new NewsData(event.params.id.toString())
+  let news = new NewsEntry(event.params.id.toString())
   news.sender = event.params.sender
   news.title = event.params.title
   news.ipfsCid = event.params.ipfsCid
@@ -28,8 +28,8 @@ export function handleNewsCreated(event: NewsCreatedEvent): void {
   news.save()
 }
 
-function updateParentForwardedNews(news: NewsData, parentId: BigInt): void {
-  let parentNews: NewsData = NewsData.load(parentId.toString())!
+function updateParentForwardedNews(news: NewsEntry, parentId: BigInt): void {
+  let parentNews: NewsEntry = NewsEntry.load(parentId.toString())!
   
   let forwarded = parentNews.forwarded
   forwarded!.push(news.id)

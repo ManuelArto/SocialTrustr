@@ -1,13 +1,13 @@
 {
-  "name": "socialtrutr",
+  "name": "socialtrustr",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ socialtrutr",
-    "create-local": "graph create --node http://localhost:8020/ socialtrutr",
-    "remove-local": "graph remove --node http://localhost:8020/ socialtrutr",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 socialtrutr",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ socialtrustr",
+    "create-local": "graph create --node http://localhost:8020/ socialtrustr",
+    "remove-local": "graph remove --node http://localhost:8020/ socialtrustr",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 socialtrustr",
     "test": "graph test"
   },
   "dependencies": {
