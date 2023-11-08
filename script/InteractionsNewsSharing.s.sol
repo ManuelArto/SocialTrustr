@@ -56,3 +56,23 @@ contract GetNews is Script {
         getNews(mostRecentlyDeployed, id);
     }
 }
+
+contract GetTotalNews is Script {
+    function getTotalNews(address mostRecentlyDeployed) public returns(uint length) {
+        vm.startBroadcast();
+        NewsSharing newsSharing = NewsSharing(payable(mostRecentlyDeployed));
+        length = newsSharing.getTotalNews();
+        vm.stopBroadcast();
+        
+        console.log("Total News: %s", length);
+    }
+
+    function run() external {
+        address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment(
+            "NewsSharing",
+            block.chainid
+        );
+        getTotalNews(mostRecentlyDeployed);
+    }
+}
+

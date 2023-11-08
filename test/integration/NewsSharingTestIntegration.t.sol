@@ -18,7 +18,7 @@ contract IntegrationsTest is StdCheats, Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, ) = deployer.run();
+        (newsSharing, , ) = deployer.run();
     }
 
     function testUserCanShareAndGetNews() public {

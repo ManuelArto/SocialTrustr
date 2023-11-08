@@ -19,7 +19,7 @@ contract NewsEvaluationTest is Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, newsEvaluation) = deployer.run();
+        (newsSharing, newsEvaluation, ) = deployer.run();
     }
 
     uint newsId;

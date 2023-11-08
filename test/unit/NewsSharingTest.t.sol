@@ -16,7 +16,7 @@ contract NewsSharingTest is Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, ) = deployer.run();
+        (newsSharing, , ) = deployer.run();
     }
 
     function testUserCanShareNews() public {

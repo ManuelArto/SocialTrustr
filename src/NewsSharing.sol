@@ -3,6 +3,7 @@ pragma solidity ^0.8.21;
 
 import "./libraries/DataTypes.sol";
 import "./libraries/Events.sol";
+import "./libraries/Errors.sol";
 import {console} from "forge-std/Script.sol";
 
 contract NewsSharing {
@@ -20,6 +21,10 @@ contract NewsSharing {
         string calldata chatName,
         uint parentId
     ) public returns (uint id) {
+        if (parentId >= s_news.length) {
+            revert Errors.NewsSharing_NoParentNewsWithThatId();
+        }
+
         DataTypes.News memory news = DataTypes.News(title, ipfsCid, chatName, msg.sender);
         s_news.push(news);
 

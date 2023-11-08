@@ -3,7 +3,7 @@
 .PHONY: all test clean deploy fund help install snapshot format anvil 
 
 DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-DEFAULT_GANACHE_KEY := 0x17007591ef80f494cc650e7e99bc50d5666bf38f0b35262ba80849ec4282fd13
+DEFAULT_GANACHE_KEY := 0x6377edc0e87761edad999e3cb2e0c17cf82c096dffa37ce3c55ddc04df4fef0e
 
 help:
 	@echo "Usage:"
@@ -48,6 +48,9 @@ shareNews:
 
 getNews:
 	@forge script script/InteractionsNewsSharing.s.sol:GetNews --sig "run(uint)" $(ARGS) $(NETWORK_ARGS)
+
+getTotalNews:
+	@forge script script/InteractionsNewsSharing.s.sol:GetTotalNews --sig "run()" $(NETWORK_ARGS)
 
 startNewsValidation:
 	@forge script script/InteractionsNewsEvaluation.s.sol:StartNewsValidation --sig "run(uint)" $(ARGS) $(NETWORK_ARGS)
