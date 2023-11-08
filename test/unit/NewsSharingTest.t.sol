@@ -57,4 +57,9 @@ contract NewsSharingTest is Test {
         
         newsSharing.createNews(TITLE, IPFSCID, CHATNAME, 0);
     }
+
+    function testUserCannotShareNewsWithNoParentNews() public {
+        vm.expectRevert();
+        newsSharing.createNews(TITLE, IPFSCID, CHATNAME, 1);
+    }
 }
