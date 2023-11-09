@@ -11,12 +11,6 @@ library Events {
         uint parentNews
     );
 
-    event NewsValidationStarted(
-        uint indexed id,
-        address indexed initiator,
-        uint deadline
-    );
-
     event NewsEvaluated(
         uint indexed id,
         address indexed evaluator,

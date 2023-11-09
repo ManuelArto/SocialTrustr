@@ -10,6 +10,7 @@ library DataTypes {
         string chatName;
         address sharer;
         bool isForwarded;
+        uint timestamp;
     }
 
     enum EvaluationStatus {

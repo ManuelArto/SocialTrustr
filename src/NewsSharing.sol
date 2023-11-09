@@ -1,18 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {NewsEvaluation} from "./NewsEvaluation.sol";
+import {TrustToken} from "./TrustToken.sol";
 import "./libraries/DataTypes.sol";
 import "./libraries/Events.sol";
 import "./libraries/Errors.sol";
-import {console} from "forge-std/Script.sol";
 
-contract NewsSharing {
+contract NewsSharing is Ownable {
+    TrustToken private immutable i_trustToken;
+
     DataTypes.News[] private s_news;
+    NewsEvaluation private s_newsEvaluation;
 
     /* Functions */
 
-    constructor() {
-        s_news.push(DataTypes.News("", "", "", address(0), false)); // Act as father for new news
+    constructor(TrustToken _trustToken) Ownable(msg.sender) {
+        i_trustToken = _trustToken;
+        s_news.push(DataTypes.News("", "", "", address(0), false, block.timestamp)); //* Act as father for new news
     }
 
     function createNews(
@@ -25,11 +31,19 @@ contract NewsSharing {
             revert Errors.NewsSharing_NoParentNewsWithThatId();
         }
 
-        DataTypes.News memory news = DataTypes.News(title, ipfsCid, chatName, msg.sender, parentId != 0);
+        i_trustToken.stakeTRS(msg.sender, address(this), i_trustToken.TRS_FOR_SHARING());
+
+        DataTypes.News memory news = DataTypes.News(title, ipfsCid, chatName, msg.sender, parentId != 0, block.timestamp);
         s_news.push(news);
+
+        // TODO: trigger evaluate news automatic function
 
         id = s_news.length - 1;
         emit Events.NewsCreated(id, msg.sender, title, ipfsCid, chatName, parentId);
+    }
+
+    function setNewsEvaluationContract(NewsEvaluation _newsEvaluation) external onlyOwner {
+        s_newsEvaluation = _newsEvaluation;
     }
 
     /** Getter Functions */

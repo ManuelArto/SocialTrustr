@@ -2,25 +2,25 @@
 pragma solidity ^0.8.21;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {NewsSharing} from "./NewsSharing.sol";
 import {TrustToken} from "./TrustToken.sol";
 import "./libraries/DataTypes.sol";
 import "./libraries/Events.sol";
 import "./libraries/Errors.sol";
 
-contract NewsEvaluation {
+contract NewsEvaluation is Ownable {
     TrustToken private immutable i_trustToken;
-    NewsSharing private immutable i_newsSharing;
-
-    uint public constant DEADLINE = 24 hours;
 
     mapping(uint => DataTypes.NewsValidation) private s_newsValidations;
+    NewsSharing private s_newsSharing;
 
+    uint public constant DEADLINE = 24 hours;
+    
     /* Functions */
 
-    constructor(TrustToken _trustToken, NewsSharing _newsSharing) {
+    constructor(TrustToken _trustToken) Ownable(msg.sender) {
         i_trustToken = _trustToken;
-        i_newsSharing = _newsSharing;
     }
 
     function evaluateNews(
@@ -28,9 +28,14 @@ contract NewsEvaluation {
         bool evaluation,
         uint confidence
     ) external {
-        if (i_newsSharing.isForwarded(newsId)) {
+        if (newsId == 0) {
+            revert Errors.NewsEvaluation_InvalidNewsId();
+        }
+        if (s_newsSharing.isForwarded(newsId)) {
             revert Errors.NewsEvaluation_CannotEvaluateForwardedNews();
         }
+
+        i_trustToken.stakeTRS(msg.sender, address(this), i_trustToken.TRS_FOR_EVALUATION());
 
         DataTypes.NewsValidation storage newsValidation = s_newsValidations[newsId];
         if (newsValidation.status != DataTypes.EvaluationStatus.NotVerified ) {
@@ -48,6 +53,10 @@ contract NewsEvaluation {
             confidence,
             newsValidation.evaluations.length
         );
+    }
+
+    function setNewsSharingContract(NewsSharing _newsSharing) external onlyOwner {
+        s_newsSharing = _newsSharing;
     }
 
     /** Getter Functions */

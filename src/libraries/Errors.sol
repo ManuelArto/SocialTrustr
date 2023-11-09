@@ -5,6 +5,14 @@ pragma solidity ^0.8.9;
 library Errors {
     error NewsSharing_NoParentNewsWithThatId();
 
+    error NewsEvaluation_InvalidNewsId();
     error NewsEvaluation_NewsValidationPeriodEnded();
     error NewsEvaluation_CannotEvaluateForwardedNews();
+
+    error TrustToken_UserAlreadyHasBadge();
+    error TrustToken_NotEnoughETH(uint);
+    error TrustToken_NotEnoughTRS(uint);
+    error TrustToken_UserIsBlacklisted();
+    error TrustToken_UserHasNoBadge();
+    error TrustToken_OnlyAdmins();
 }

@@ -28,50 +28,13 @@ contract NewsEvaluationTest is Test {
         _;
     }
 
-    function testUserCanStartValidation() public shareNews {
-        newsEvaluation.startNewsValidation(newsId);
-    }
-
-    function testUserCannotStartValidationIfAlreadyStarted() public shareNews {
-        newsEvaluation.startNewsValidation(newsId);
-
-        vm.expectRevert();
-        newsEvaluation.startNewsValidation(newsId);
-    }
-
-    function testEmitNewsValidationStarted() public shareNews {
-        vm.expectEmit();
-        emit Events.NewsValidationStarted(newsId, address(this), DEADLINE);
-
-        newsEvaluation.startNewsValidation(newsId);
-    }
-
-    function testCorrectlyStartedNewsValidation() public shareNews {
-        newsEvaluation.startNewsValidation(newsId);
-        (
-            address initiator,
-            uint deadline,
-            ,
-            DataTypes.Evaluation memory finalEvaluation,
-            uint evaluationCount
-        ) = newsEvaluation.getNewsValidation(newsId);
-
-        assertEq(initiator, address(this));
-        assertEq(deadline, DEADLINE);
-        assertEq(finalEvaluation.evaluation, false);
-        assertEq(finalEvaluation.confidence, 0);
-        assertEq(evaluationCount, 0);
-    }
-
     function testUserCanEvaluateNews() public shareNews {
-        newsEvaluation.startNewsValidation(newsId);
-        
         vm.expectEmit();
         emit Events.NewsEvaluated(newsId, address(this), true, 50, 1);
         
         newsEvaluation.evaluateNews(newsId, true, 50);
     }
 
-    function testUserCannotEvaluateNewsIfNotStarted() public shareNews {
+    function testUserCannotEvaluateNewsIfNotEvaluationTime() public shareNews {
     }
 }
