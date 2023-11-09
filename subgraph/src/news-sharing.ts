@@ -11,14 +11,16 @@ export function handleNewsCreated(event: NewsCreatedEvent): void {
   news.ipfsCid = event.params.ipfsCid
   news.chatName = event.params.chatName
   news.forwarded = []
-  news.evaluation = createInitialEvaluation(event).id
   // Parent News Infos
   news.isForwaded = event.params.parentNews.notEqual(BigInt.zero())
   if (news.isForwaded) {
     updateParentForwardedNews(news, event.params.parentNews)
     news.parentNews = event.params.parentNews.toString()
+    // Link to parent news evaluation
+    news.evaluation = NewsEntry.load(news.parentNews)!.evaluation;
   } else {
     news.parentNews = "0"
+    news.evaluation = createInitialEvaluation(event).id
   }
 
   news.blockNumber = event.block.number
@@ -30,7 +32,7 @@ export function handleNewsCreated(event: NewsCreatedEvent): void {
 
 function updateParentForwardedNews(news: NewsEntry, parentId: BigInt): void {
   let parentNews: NewsEntry = NewsEntry.load(parentId.toString())!
-  
+
   let forwarded = parentNews.forwarded
   forwarded!.push(news.id)
   parentNews.forwarded = forwarded
@@ -41,8 +43,8 @@ function updateParentForwardedNews(news: NewsEntry, parentId: BigInt): void {
 
 function createInitialEvaluation(event: NewsCreatedEvent): Evaluation {
   let evaluation = new Evaluation(event.params.id.toString());
-  evaluation.status = "NotStarted"
-  
+  evaluation.status = "Evaluating"
+
   evaluation.save()
   return evaluation;
 }

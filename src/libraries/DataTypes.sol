@@ -9,27 +9,30 @@ library DataTypes {
         string ipfsCid;
         string chatName;
         address sharer;
+        bool isForwarded;
     }
 
     enum EvaluationStatus {
-        NotStarted,
-        NotVerified,
         Evaluating,
+        NotVerified,
         Evaluated
     }
 
+    struct FinalEvaluation {
+        bool evaluation;
+        uint confidence;
+    }
+
     struct Evaluation {
+        address evaluator;
         bool evaluation;
         uint confidence;
     }
 
     struct NewsValidation {
-        address initiator;
-        uint deadline;
         EvaluationStatus status;
-        Evaluation finalEvaluation;
-        mapping (address => Evaluation) evaluations;
-        uint evaluationsCount;
+        FinalEvaluation finalEvaluation;
+        Evaluation[] evaluations;
     }
    
 }

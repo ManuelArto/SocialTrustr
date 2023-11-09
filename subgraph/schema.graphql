@@ -1,7 +1,6 @@
 enum EvaluationStatus {
-  NotStarted,
-  NotVerified,
   Evaluating,
+  NotVerified,
   Evaluated
 }
 

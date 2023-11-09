@@ -12,7 +12,7 @@ contract NewsSharing {
     /* Functions */
 
     constructor() {
-        s_news.push(DataTypes.News("", "", "", address(0))); // Act as father for new news
+        s_news.push(DataTypes.News("", "", "", address(0), false)); // Act as father for new news
     }
 
     function createNews(
@@ -20,19 +20,17 @@ contract NewsSharing {
         string calldata ipfsCid,
         string calldata chatName,
         uint parentId
-    ) public returns (uint id) {
+    ) external returns (uint id) {
         if (parentId >= s_news.length) {
             revert Errors.NewsSharing_NoParentNewsWithThatId();
         }
 
-        DataTypes.News memory news = DataTypes.News(title, ipfsCid, chatName, msg.sender);
+        DataTypes.News memory news = DataTypes.News(title, ipfsCid, chatName, msg.sender, parentId != 0);
         s_news.push(news);
 
         id = s_news.length - 1;
         emit Events.NewsCreated(id, msg.sender, title, ipfsCid, chatName, parentId);
     }
-
-    /** Internal Functions */
 
     /** Getter Functions */
 
@@ -42,5 +40,9 @@ contract NewsSharing {
 
     function getNews(uint index) public view returns (DataTypes.News memory news) {
         news = s_news[index];
+    }
+
+    function isForwarded(uint index) public view returns (bool forwarded) {
+        forwarded = s_news[index].isForwarded;
     }
 }
