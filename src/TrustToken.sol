@@ -43,16 +43,14 @@ contract TrustToken is ERC20 {
         uint toMint = INITIAL_TRS;
         if (getFundsTRS() > 0 && getFundsTRS() < INITIAL_TRS) {
             toMint = INITIAL_TRS - getFundsTRS();
-            transfer(msg.sender, getFundsTRS());
+            _transfer(address(this), msg.sender, getFundsTRS());
         } else if (getFundsTRS() >= INITIAL_TRS) {
             toMint = 0;
-            transfer(msg.sender, INITIAL_TRS);
+            _transfer(address(this), msg.sender, INITIAL_TRS);
         }
 
-        console.log(toMint);
-
         if (toMint > 0) {
-            _mint(msg.sender, INITIAL_TRS);
+            _mint(msg.sender, toMint);
         }
 
         uint excess = msg.value - convertTRStoETH(INITIAL_TRS);
@@ -64,7 +62,7 @@ contract TrustToken is ERC20 {
     /**
      * @dev Buy TrustToken directly from contract funds by sending ETH, only if the user has badge.
      */
-    function buyTrustTokenFromFunds() external payable {
+    function buyFromFunds() external payable {
         if (balanceOf(msg.sender) == 0) {
             revert Errors.TrustToken_UserHasNoBadge();
         }
@@ -74,7 +72,7 @@ contract TrustToken is ERC20 {
             revert Errors.TrustToken_NotEnoughTRS(getFundsTRS());
         }
 
-        transfer(msg.sender, trsAmount);
+        _transfer(address(this), msg.sender, trsAmount);
     }
 
     /**
@@ -107,21 +105,19 @@ contract TrustToken is ERC20 {
     }
 
     /**
-     * @dev Get the price of a badge.
+     * @dev Get the price of a badge in wei.
      */
     function getBadgePrice() public pure returns (uint) {
-        return INITIAL_TRS / TRS_FOR_ETH;
+        return (INITIAL_TRS / TRS_FOR_ETH) * (10 ** 18);
     }
-
-    /* INTERNAL FUNCTIONS */
 
     /**
      * @dev Convert ETH value to TRS tokens.
      * @param amount The amount of WEI to convert.
      * @return The equivalent amount of TRS tokens.
      */
-    function convertETHtoTRS(uint amount) internal pure returns (uint) {
-        return amount * (10 ** 18) * TRS_FOR_ETH;
+    function convertETHtoTRS(uint amount) public pure returns (uint) {
+        return (amount * TRS_FOR_ETH) / (10 ** 18);
     }
 
     /**
@@ -129,9 +125,11 @@ contract TrustToken is ERC20 {
      * @param amount The amount of TRS to convert.
      * @return The equivalent amount of WEI.
      */
-    function convertTRStoETH(uint amount) internal pure returns (uint) {
-        return amount / (10 ** 18) / TRS_FOR_ETH;
+    function convertTRStoETH(uint amount) public pure returns (uint) {
+        return (amount / TRS_FOR_ETH) * (10 ** 18);
     }
+
+    /* INTERNAL FUNCTIONS */
 
     /**
      * @dev Send ETH to the specified address.
@@ -153,7 +151,7 @@ contract TrustToken is ERC20 {
     ) internal virtual override {
         super._update(from, to, amount);
         if (to == address(this)) {
-            uint ethToSend = amount / TRS_FOR_ETH;
+            uint ethToSend = convertTRStoETH(amount);
             sendETH(from, ethToSend);
         }
     }
