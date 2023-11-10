@@ -5,12 +5,14 @@ pragma solidity ^0.8.21;
 import {Test, console} from "forge-std/Test.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
-import {ShareNews, GetNews} from "../../script/InteractionsNewsSharing.s.sol";
+import {NewsSharingInteractions} from "../../script/InteractionsNewsSharing.s.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
+import {TrustToken} from "../../src/TrustToken.sol";
 import "../../src/libraries/DataTypes.sol";
 
 contract IntegrationsTest is StdCheats, Test {
-    NewsSharing public newsSharing;
+    NewsSharing newsSharing;
+    TrustToken trustToken;
 
     string public constant TITLE = "TITLE";
     string public constant IPFSCID = "123456";
@@ -18,15 +20,15 @@ contract IntegrationsTest is StdCheats, Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, , ) = deployer.run();
+        (newsSharing, , trustToken) = deployer.run();
+        trustToken.buyBadge{value: trustToken.getBadgePrice()}();
     }
 
     function testUserCanShareAndGetNews() public {
-        ShareNews shareNews = new ShareNews();
-        shareNews.shareNews(address(newsSharing), TITLE, IPFSCID, CHATNAME, 0);
+        NewsSharingInteractions newsSharingInteractions = new NewsSharingInteractions();
 
-        GetNews getNews = new GetNews();
-        DataTypes.News memory news = getNews.getNews(address(newsSharing), 1);
+        newsSharingInteractions.shareNews(TITLE, IPFSCID, CHATNAME, 0);
+        DataTypes.News memory news = newsSharingInteractions.getNews(1);
 
         assertEq(news.title, TITLE);
         assertEq(news.ipfsCid, IPFSCID);

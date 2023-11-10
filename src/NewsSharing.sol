@@ -31,7 +31,7 @@ contract NewsSharing is Ownable {
             revert Errors.NewsSharing_NoParentNewsWithThatId();
         }
 
-        i_trustToken.stakeTRS(msg.sender, address(this), i_trustToken.TRS_FOR_SHARING());
+        i_trustToken.stakeTRS(msg.sender, address(s_newsEvaluation), i_trustToken.TRS_FOR_SHARING());
 
         DataTypes.News memory news = DataTypes.News(title, ipfsCid, chatName, msg.sender, parentId != 0, block.timestamp);
         s_news.push(news);

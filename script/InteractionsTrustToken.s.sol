@@ -15,7 +15,7 @@ contract TrustTokenInteractions is Script {
         uint contractBalance = address(trs).balance;
         
         console.log("Badge price (wei): %s", trs.getBadgePrice());
-        trs.buyBadge{value: trs.getBadgePrice() + 1000}();
+        trs.buyBadge{value: trs.getBadgePrice()}();
         logInfos(trs, previousETH, previousTRS, fundTRS, contractBalance);
     }
 
@@ -43,10 +43,14 @@ contract TrustTokenInteractions is Script {
         logInfos(trs, previousETH, previousTRS, fundTRS, contractBalance);
     }
 
-    function getBalances() external startBroadcast {
+    function getBalances() external {
+        getBalances(msg.sender);
+    }
+
+    function getBalances(address _address) public startBroadcast {
         TrustToken trs = getTrustTokenContract();
-        console.log("My TRS: %s", trs.balanceOf(msg.sender));
-        console.log("My ETH: %s", msg.sender.balance);
+        console.log("Address TRS: %s", trs.balanceOf(_address));
+        console.log("Address ETH: %s", _address.balance);
         console.log("Contract ETH: %s", address(trs).balance);
         console.log("Contract TRS: %s", trs.getFundsTRS());
     }

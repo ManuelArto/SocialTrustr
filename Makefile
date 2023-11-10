@@ -44,23 +44,32 @@ endif
 deploy:
 	@forge script script/DeployScript.s.sol:DeployScript $(NETWORK_ARGS)
 
+# NEWS SHARING
 shareNews:
-	@forge script script/InteractionsNewsSharing.s.sol:ShareNews --sig "run(string, string, string, uint)" $(ARGS) $(NETWORK_ARGS)
+	@forge script script/InteractionsNewsSharing.s.sol:NewsSharingInteractions --sig "shareNews(string, string, string, uint)" $(ARGS) $(NETWORK_ARGS)
 
 getNews:
-	@forge script script/InteractionsNewsSharing.s.sol:GetNews --sig "run(uint)" $(ARGS) $(NETWORK_ARGS)
+	@forge script script/InteractionsNewsSharing.s.sol:NewsSharingInteractions --sig "getNews(uint)" $(ARGS) $(NETWORK_ARGS)
 
 getTotalNews:
-	@forge script script/InteractionsNewsSharing.s.sol:GetTotalNews --sig "run()" $(NETWORK_ARGS)
+	@forge script script/InteractionsNewsSharing.s.sol:NewsSharingInteractions --sig "getTotalNews()" $(NETWORK_ARGS)
 
+# NEWS EVALUATION
 evaluateNews:
-	@forge script script/InteractionsNewsEvaluation.s.sol:EvaluateNews --sig "run(uint, bool, uint)" $(ARGS) $(NETWORK_ARGS)
+	@forge script script/InteractionsNewsEvaluation.s.sol:NewsEvaluationInteractions --sig "evaluateNews(uint, bool, uint)" $(ARGS) $(NETWORK_ARGS)
 
+getNewsValidation:
+	@forge script script/InteractionsNewsEvaluation.s.sol:NewsEvaluationInteractions --sig "getNewsValidation(uint)" $(ARGS) $(NETWORK_ARGS)
+
+# TRUST TOKEN
 buyBadge:
 	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "buyBadge()" $(NETWORK_ARGS)
 
 getBalances:
 	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "getBalances()" $(NETWORK_ARGS)
+
+getBalancesOf:
+	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "getBalances(address)" $(ARGS) $(NETWORK_ARGS)
 
 sellTrustToken:
 	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "sellTrustToken(uint)" $(ARGS) $(NETWORK_ARGS)

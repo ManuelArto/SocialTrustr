@@ -35,12 +35,12 @@ contract NewsEvaluation is Ownable {
             revert Errors.NewsEvaluation_CannotEvaluateForwardedNews();
         }
 
-        i_trustToken.stakeTRS(msg.sender, address(this), i_trustToken.TRS_FOR_EVALUATION());
-
         DataTypes.NewsValidation storage newsValidation = s_newsValidations[newsId];
-        if (newsValidation.status != DataTypes.EvaluationStatus.NotVerified ) {
+        if (newsValidation.status != DataTypes.EvaluationStatus.Evaluating ) {
             revert Errors.NewsEvaluation_NewsValidationPeriodEnded();
         }
+
+        i_trustToken.stakeTRS(msg.sender, address(this), i_trustToken.TRS_FOR_EVALUATION());
 
         newsValidation.evaluations.push(
             DataTypes.Evaluation(msg.sender, evaluation, confidence)

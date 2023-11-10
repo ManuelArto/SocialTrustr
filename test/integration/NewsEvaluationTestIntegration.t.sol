@@ -5,14 +5,16 @@ pragma solidity ^0.8.21;
 import {Test, console} from "forge-std/Test.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
-import {EvaluateNews, GetNewsValidation} from "../../script/InteractionsNewsEvaluation.s.sol";
+import {NewsEvaluationInteractions} from "../../script/InteractionsNewsEvaluation.s.sol";
 import {NewsEvaluation} from "../../src/NewsEvaluation.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
+import {TrustToken} from "../../src/TrustToken.sol";
 import "../../src/libraries/DataTypes.sol";
 
 contract IntegrationsTest is StdCheats, Test {
     NewsEvaluation newsEvaluation;
     NewsSharing newsSharing;
+    TrustToken trustToken;
 
     string public constant TITLE = "TITLE";
     string public constant IPFSCID = "123456";
@@ -23,7 +25,8 @@ contract IntegrationsTest is StdCheats, Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, newsEvaluation, ) = deployer.run();
+        (newsSharing, newsEvaluation, trustToken) = deployer.run();
+        trustToken.buyBadge{value: trustToken.getBadgePrice()}();
     }
 
     uint newsId;
@@ -33,15 +36,14 @@ contract IntegrationsTest is StdCheats, Test {
     }
 
     function testUserCanEvaluateAndGetNewsValidation() public shareNews {
-        EvaluateNews evaluateNews = new EvaluateNews();
-        evaluateNews.evaluateNews(address(newsEvaluation), newsId, EVALUATION, CONFIDENCE);
+        NewsEvaluationInteractions newsEvaluationInteractions = new NewsEvaluationInteractions();
 
-        GetNewsValidation getNewsValidation = new GetNewsValidation();
+        newsEvaluationInteractions.evaluateNews(newsId, EVALUATION, CONFIDENCE);
         (
             DataTypes.EvaluationStatus status,
             DataTypes.FinalEvaluation memory finalEvaluation,
             uint evaluationsCount
-        ) = getNewsValidation.getNewsValidation(address(newsEvaluation), newsId);
+        ) = newsEvaluationInteractions.getNewsValidation(newsId);
 
         assertEq(uint(status), uint(DataTypes.EvaluationStatus.Evaluating));
         assertEq(finalEvaluation.evaluation, false);
