@@ -8,6 +8,8 @@ import "./libraries/Errors.sol";
 contract TrustToken is ERC20 {
     mapping(address => bool) public s_admins;
     mapping(address => bool) public s_blacklist;
+    
+    uint public trustedUsers = 0;
 
     uint public constant INITIAL_TRS = 500;
     uint public constant TRS_FOR_EVALUATION = 100;
@@ -57,6 +59,8 @@ contract TrustToken is ERC20 {
         if (excess > 0) {
             sendETH(msg.sender, excess);
         }
+
+        trustedUsers++;
     }
 
     /**
@@ -153,6 +157,9 @@ contract TrustToken is ERC20 {
         if (to == address(this)) {
             uint ethToSend = convertTRStoETH(amount);
             sendETH(from, ethToSend);
+            if (balanceOf(from) == 0) {
+                trustedUsers--;
+            }
         }
     }
 }
