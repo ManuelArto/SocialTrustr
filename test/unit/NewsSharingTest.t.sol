@@ -5,9 +5,11 @@ import "../../src/libraries/DataTypes.sol";
 import "../../src/libraries/Events.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
+import {TrustToken} from "../../src/TrustToken.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
 
 contract NewsSharingTest is Test {
+    TrustToken trustToken;
     NewsSharing newsSharing;
 
     string public constant TITLE = "TITLE";
@@ -16,7 +18,8 @@ contract NewsSharingTest is Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, , ) = deployer.run();
+        (newsSharing, , trustToken) = deployer.run();
+        trustToken.buyBadge{value: trustToken.getBadgePrice()}();
     }
 
     function testUserCanShareNews() public {

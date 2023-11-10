@@ -6,11 +6,13 @@ import "../../src/libraries/Events.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {NewsEvaluation} from "../../src/NewsEvaluation.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
+import {TrustToken} from "../../src/TrustToken.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
 
 contract NewsEvaluationTest is Test {
     NewsEvaluation newsEvaluation;
     NewsSharing newsSharing;
+    TrustToken trustToken;
 
     string public constant TITLE = "TITLE";
     string public constant IPFSCID = "123456";
@@ -19,7 +21,8 @@ contract NewsEvaluationTest is Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, newsEvaluation, ) = deployer.run();
+        (newsSharing, newsEvaluation, trustToken) = deployer.run();
+        trustToken.buyBadge{value: trustToken.getBadgePrice()}();
     }
 
     uint newsId;
