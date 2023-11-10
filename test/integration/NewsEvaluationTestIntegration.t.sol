@@ -35,15 +35,22 @@ contract IntegrationsTest is StdCheats, Test {
         _;
     }
 
-    function testUserCanEvaluateAndGetNewsValidation() public shareNews {
+    modifier getBadge() {
+        vm.startPrank(address(msg.sender));
+        trustToken.buyBadge{value: trustToken.getBadgePrice()}();
+        vm.stopPrank();
+        _;
+    }
+
+    function testUserCanEvaluateAndGetNewsValidation() public getBadge shareNews  {
         NewsEvaluationInteractions newsEvaluationInteractions = new NewsEvaluationInteractions();
 
-        newsEvaluationInteractions.evaluateNews(newsId, EVALUATION, CONFIDENCE);
+        newsEvaluationInteractions.evaluateNews(address(newsEvaluation), newsId, EVALUATION, CONFIDENCE);
         (
             DataTypes.EvaluationStatus status,
             DataTypes.FinalEvaluation memory finalEvaluation,
             uint evaluationsCount
-        ) = newsEvaluationInteractions.getNewsValidation(newsId);
+        ) = newsEvaluationInteractions.getNewsValidation(address(newsEvaluation), newsId);
 
         assertEq(uint(status), uint(DataTypes.EvaluationStatus.Evaluating));
         assertEq(finalEvaluation.evaluation, false);

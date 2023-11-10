@@ -8,18 +8,19 @@ import {DevOpsTools} from "../lib/foundry-devops/src/DevOpsTools.sol";
 
 contract NewsSharingInteractions is Script {
     function shareNews(
+        address _contract,
         string calldata title,
         string calldata ipfsCid,
         string calldata chatName,
         uint parentId
     ) public startBroadcast {
-        NewsSharing newsSharing = getNewsSharingContract();
+        NewsSharing newsSharing = NewsSharing(payable(_contract));
         uint newsId = newsSharing.createNews(title, ipfsCid, chatName, parentId);
         console.log("News ID: %s", newsId);
     }
 
-    function getNews(uint id) public startBroadcast returns(DataTypes.News memory news) {
-        NewsSharing newsSharing = getNewsSharingContract();
+    function getNews(address _contract, uint id) public startBroadcast returns(DataTypes.News memory news) {
+        NewsSharing newsSharing = NewsSharing(payable(_contract));
         news = newsSharing.getNews(id);
         
         console.log("Sharer: %s", news.sharer);
@@ -29,21 +30,40 @@ contract NewsSharingInteractions is Script {
         console.log("Is Forwarded: %s", news.isForwarded);
     }
 
-    function getTotalNews() public startBroadcast returns(uint length) {
-        NewsSharing newsSharing = getNewsSharingContract();
+    function getTotalNews(address _contract) public startBroadcast returns(uint length) {
+        NewsSharing newsSharing = NewsSharing(payable(_contract));
         length = newsSharing.getTotalNews();
         
         console.log("Total News: %s", length);
     }
 
+    /* OVERLOAD FUNCTIONS */
+
+    function shareNews(
+        string calldata title,
+        string calldata ipfsCid,
+        string calldata chatName,
+        uint parentId
+    ) external startBroadcast {
+        shareNews(getNewsSharingAddress(), title, ipfsCid, chatName, parentId);
+    }
+
+    function getNews(uint id) external startBroadcast returns(DataTypes.News memory news) {
+        return getNews(getNewsSharingAddress(), id);
+    }
+
+    function getTotalNews() external startBroadcast returns(uint length) {
+        return getTotalNews(getNewsSharingAddress());
+    }
+
     /* INTERNAL FUNCTIONS */
 
-    function getNewsSharingContract() internal returns (NewsSharing) {
+    function getNewsSharingAddress() internal returns (address) {
         address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment(
             "NewsSharing",
             block.chainid
         );
-        return NewsSharing(payable(mostRecentlyDeployed));
+        return mostRecentlyDeployed;
     }
 
     modifier startBroadcast {

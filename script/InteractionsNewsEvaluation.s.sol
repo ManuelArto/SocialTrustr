@@ -8,20 +8,21 @@ import {DevOpsTools} from "../lib/foundry-devops/src/DevOpsTools.sol";
 
 contract NewsEvaluationInteractions is Script {
     function evaluateNews(
+        address _contract,
         uint newsId,
         bool evaluation,
         uint confidence
-    ) external startBroadcast {
-        NewsEvaluation newsEvaluation = getNewsEvaluationContract();
+    ) public startBroadcast {
+        NewsEvaluation newsEvaluation = NewsEvaluation(payable(_contract));
         newsEvaluation.evaluateNews(newsId, evaluation, confidence);
     }
 
-    function getNewsValidation(uint newsId) public startBroadcast returns (
+    function getNewsValidation(address _contract, uint newsId) public startBroadcast returns (
         DataTypes.EvaluationStatus status,
         DataTypes.FinalEvaluation memory finalEvaluation,
         uint evaluationsCount
     ) {
-        NewsEvaluation newsEvaluation = getNewsEvaluationContract();
+        NewsEvaluation newsEvaluation = NewsEvaluation(payable(_contract));
         (
             status,
             finalEvaluation,
@@ -33,14 +34,32 @@ contract NewsEvaluationInteractions is Script {
         console.log("Evaluations Count: %s", evaluationsCount);
     }
 
+    /* OVERLOAD FUNCTIONS */
+    
+    function evaluateNews(
+        uint newsId,
+        bool evaluation,
+        uint confidence
+    ) external startBroadcast {
+        evaluateNews(getNewsEvaluationContract(), newsId, evaluation, confidence);
+    }
+
+    function getNewsValidation(uint newsId) external startBroadcast returns (
+        DataTypes.EvaluationStatus status,
+        DataTypes.FinalEvaluation memory finalEvaluation,
+        uint evaluationsCount
+    ) {
+        return getNewsValidation(getNewsEvaluationContract(), newsId);
+    }
+
     /* INTERNAL FUNCTIONS */
 
-    function getNewsEvaluationContract() internal returns (NewsEvaluation) {
+    function getNewsEvaluationContract() internal returns (address) {
         address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment(
             "NewsEvaluation",
             block.chainid
         );
-        return NewsEvaluation(payable(mostRecentlyDeployed));
+        return mostRecentlyDeployed;
     }
 
     modifier startBroadcast {

@@ -7,6 +7,7 @@ import {StdCheats} from "forge-std/StdCheats.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
 import {NewsSharingInteractions} from "../../script/InteractionsNewsSharing.s.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
+import {NewsEvaluation} from "../../src/NewsEvaluation.sol";
 import {TrustToken} from "../../src/TrustToken.sol";
 import "../../src/libraries/DataTypes.sol";
 
@@ -21,14 +22,20 @@ contract IntegrationsTest is StdCheats, Test {
     function setUp() external {
         DeployScript deployer = new DeployScript();
         (newsSharing, , trustToken) = deployer.run();
-        trustToken.buyBadge{value: trustToken.getBadgePrice()}();
     }
 
-    function testUserCanShareAndGetNews() public {
+    modifier getBadge() {
+        vm.startPrank(address(msg.sender));
+        trustToken.buyBadge{value: trustToken.getBadgePrice()}();
+        vm.stopPrank();
+        _;
+    }
+
+    function testUserCanShareAndGetNews() public getBadge{
         NewsSharingInteractions newsSharingInteractions = new NewsSharingInteractions();
 
-        newsSharingInteractions.shareNews(TITLE, IPFSCID, CHATNAME, 0);
-        DataTypes.News memory news = newsSharingInteractions.getNews(1);
+        newsSharingInteractions.shareNews(address(newsSharing), TITLE, IPFSCID, CHATNAME, 0);
+        DataTypes.News memory news = newsSharingInteractions.getNews(address(newsSharing), 1);
 
         assertEq(news.title, TITLE);
         assertEq(news.ipfsCid, IPFSCID);
