@@ -18,7 +18,7 @@ contract NewsSharingTest is Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, , trustToken) = deployer.run();
+        (newsSharing, , trustToken, ) = deployer.run();
         trustToken.buyBadge{value: trustToken.getBadgePrice()}();
     }
 

@@ -25,7 +25,7 @@ contract IntegrationsTest is StdCheats, Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, newsEvaluation, trustToken) = deployer.run();
+        (newsSharing, newsEvaluation, trustToken, ) = deployer.run();
         trustToken.buyBadge{value: trustToken.getBadgePrice()}();
     }
 

@@ -3,20 +3,27 @@ pragma solidity ^0.8.21;
 
 import {console} from "forge-std/console.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {PriceConverter} from "./libraries/PriceConverter.sol";
 import "./libraries/Errors.sol";
 
 contract TrustToken is ERC20 {
+    using PriceConverter for uint256;
+    
+    AggregatorV3Interface private s_priceFeed;
     mapping(address => uint) public s_trustness; // Range [0, 100]
     mapping(address => bool) public s_admins;
     mapping(address => bool) public s_blacklist;
     
     uint public trustedUsers = 0;
 
+    // 500 TRS = 50 USD
+    uint public constant INITIAL_USD_PRICE = 50;
     uint public constant INITIAL_TRS = 500;
+    uint public constant TRS_FOR_USD = (INITIAL_TRS * 1e18) / INITIAL_USD_PRICE;
+    uint public constant USD_FOR_TRS = (INITIAL_USD_PRICE * 1e18) / INITIAL_TRS;
     uint public constant TRS_FOR_EVALUATION = 100;
     uint public constant TRS_FOR_SHARING = 200;
-    // * 50TRS = 1ETH
-    uint public constant TRS_FOR_ETH = 50 * 1; // TODO: convert to EUR using Stablecoin or FiatContract
 
     modifier onlyAdmins() {
         if (!s_admins[msg.sender]) {
@@ -25,8 +32,9 @@ contract TrustToken is ERC20 {
         _;
     }
 
-    constructor() ERC20("TrustToken", "TRS") {
+    constructor(address priceFeed) ERC20("TrustToken", "TRS") {
         s_admins[msg.sender] = true;
+        s_priceFeed = AggregatorV3Interface(priceFeed);
     }
 
     /**
@@ -39,8 +47,9 @@ contract TrustToken is ERC20 {
         if (s_blacklist[msg.sender]) {
             revert Errors.TrustToken_UserIsBlacklisted();
         }
-        if (convertETHtoTRS(msg.value) < INITIAL_TRS) {
-            revert Errors.TrustToken_NotEnoughETH(INITIAL_TRS / TRS_FOR_ETH);
+
+        if (msg.value.convertETHtoUSD(s_priceFeed) < INITIAL_USD_PRICE) {
+            revert Errors.TrustToken_NotEnoughETH(INITIAL_USD_PRICE.convertUSDtoETH(s_priceFeed));
         }
 
         uint toMint = INITIAL_TRS;
@@ -113,8 +122,8 @@ contract TrustToken is ERC20 {
     /**
      * @dev Get the price of a badge in wei.
      */
-    function getBadgePrice() public pure returns (uint) {
-        return (INITIAL_TRS / TRS_FOR_ETH) * (10 ** 18);
+    function getBadgePrice() public view returns (uint) {
+        return convertTRStoETH(INITIAL_TRS);
     }
 
     /**
@@ -122,8 +131,8 @@ contract TrustToken is ERC20 {
      * @param amount The amount of WEI to convert.
      * @return The equivalent amount of TRS tokens.
      */
-    function convertETHtoTRS(uint amount) public pure returns (uint) {
-        return (amount * TRS_FOR_ETH) / (10 ** 18);
+    function convertETHtoTRS(uint amount) public view returns (uint) {
+        return (amount.convertETHtoUSD(s_priceFeed) * TRS_FOR_USD) / 1e18;
     }
 
     /**
@@ -131,8 +140,8 @@ contract TrustToken is ERC20 {
      * @param amount The amount of TRS to convert.
      * @return The equivalent amount of WEI.
      */
-    function convertTRStoETH(uint amount) public pure returns (uint) {
-        return (amount / TRS_FOR_ETH) * (10 ** 18);
+    function convertTRStoETH(uint amount) public view returns (uint) {
+        return (amount * USD_FOR_TRS).convertUSDtoETH(s_priceFeed) / 1e18;
     }
 
     function getTrustLevel(address user) public view returns (uint) {

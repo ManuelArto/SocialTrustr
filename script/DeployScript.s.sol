@@ -2,21 +2,23 @@
 pragma solidity ^0.8.21;
 
 import {Script, console} from "forge-std/Script.sol";
+import {HelperConfig} from "./HelperConfig.s.sol";
 import {NewsSharing} from "../src/NewsSharing.sol";
 import {NewsEvaluation} from "../src/NewsEvaluation.sol";
 import {TrustToken} from "../src/TrustToken.sol";
 
 contract DeployScript is Script {
-    function run()
-        external
-        returns (
-            NewsSharing newsSharing,
-            NewsEvaluation newsEvaluation,
-            TrustToken trustToken
-        )
-    {
+    function run() external returns (
+        NewsSharing newsSharing,
+        NewsEvaluation newsEvaluation,
+        TrustToken trustToken,
+        HelperConfig helperConfig
+    ) {
+        helperConfig = new HelperConfig();
+        address ethUsdPriceeFeed = helperConfig.activeNetworkConfig();
+
         vm.startBroadcast();
-        trustToken = new TrustToken();
+        trustToken = new TrustToken(ethUsdPriceeFeed);
         newsSharing = new NewsSharing(trustToken);
         newsEvaluation = new NewsEvaluation(trustToken);
         // Add contract to each oher
