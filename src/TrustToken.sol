@@ -6,6 +6,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./libraries/Errors.sol";
 
 contract TrustToken is ERC20 {
+    mapping(address => uint) public trustness; // Range [0, 100]
     mapping(address => bool) public s_admins;
     mapping(address => bool) public s_blacklist;
     
@@ -60,6 +61,7 @@ contract TrustToken is ERC20 {
             sendETH(msg.sender, excess);
         }
 
+        trustness[msg.sender] = 50;
         trustedUsers++;
     }
 
@@ -80,7 +82,7 @@ contract TrustToken is ERC20 {
     }
 
     /**
-     * @dev Stake TRS tokens to a contract address. Given back or tuned after News Validation.
+     * @dev Stake TRS tokens to a contract address. Given back or tuned after News Validation. Only for admins.
      * @param user The address of the user staking TRS tokens.
      * @param contractAddress The address of the contract to stake to.
      * @param amount The amount of TRS tokens to stake.
@@ -131,6 +133,10 @@ contract TrustToken is ERC20 {
      */
     function convertTRStoETH(uint amount) public pure returns (uint) {
         return (amount / TRS_FOR_ETH) * (10 ** 18);
+    }
+
+    function getTrustLevel(address user) public view returns (uint) {
+        return trustness[user];
     }
 
     /* INTERNAL FUNCTIONS */
