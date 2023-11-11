@@ -35,5 +35,12 @@ library DataTypes {
         FinalEvaluation finalEvaluation;
         Evaluation[] evaluations;
     }
+
+    struct TrustScore {
+        bool evaluation;
+        uint score;
+        uint totalConfidence;
+        uint votersLength;
+    }
    
 }
