@@ -6,7 +6,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./libraries/Errors.sol";
 
 contract TrustToken is ERC20 {
-    mapping(address => uint) public trustness; // Range [0, 100]
+    mapping(address => uint) public s_trustness; // Range [0, 100]
     mapping(address => bool) public s_admins;
     mapping(address => bool) public s_blacklist;
     
@@ -61,7 +61,7 @@ contract TrustToken is ERC20 {
             sendETH(msg.sender, excess);
         }
 
-        trustness[msg.sender] = 50;
+        s_trustness[msg.sender] = 50;
         trustedUsers++;
     }
 
@@ -136,7 +136,7 @@ contract TrustToken is ERC20 {
     }
 
     function getTrustLevel(address user) public view returns (uint) {
-        return trustness[user];
+        return s_trustness[user];
     }
 
     /* INTERNAL FUNCTIONS */
