@@ -4,9 +4,9 @@ pragma solidity ^0.8.21;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {NewsEvaluation} from "./NewsEvaluation.sol";
 import {TrustToken} from "./TrustToken.sol";
-import "./libraries/DataTypes.sol";
-import "./libraries/Events.sol";
-import "./libraries/Errors.sol";
+import "./libraries/types/DataTypes.sol";
+import "./libraries/types/Events.sol";
+import "./libraries/types/Errors.sol";
 
 contract NewsSharing is Ownable {
     TrustToken private immutable i_trustToken;

@@ -4,8 +4,8 @@ pragma solidity ^0.8.21;
 import {console} from "forge-std/console.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import {PriceConverter} from "./libraries/PriceConverter.sol";
-import "./libraries/Errors.sol";
+import {PriceConverter} from "./libraries/services/PriceConverter.sol";
+import "./libraries/types/Errors.sol";
 
 contract TrustToken is ERC20 {
     using PriceConverter for uint256;

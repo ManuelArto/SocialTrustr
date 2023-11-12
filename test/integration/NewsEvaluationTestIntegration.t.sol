@@ -9,7 +9,7 @@ import {NewsEvaluationInteractions} from "../../script/InteractionsNewsEvaluatio
 import {NewsEvaluation} from "../../src/NewsEvaluation.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
 import {TrustToken} from "../../src/TrustToken.sol";
-import "../../src/libraries/DataTypes.sol";
+import "../../src/libraries/types/DataTypes.sol";
 
 contract IntegrationsTest is StdCheats, Test {
     NewsEvaluation newsEvaluation;

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import "../../src/libraries/DataTypes.sol";
-import "../../src/libraries/Events.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
 import {TrustToken} from "../../src/TrustToken.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
+import "../../src/libraries/types/DataTypes.sol";
+import "../../src/libraries/types/Events.sol";
 
 contract NewsSharingTest is Test {
     TrustToken trustToken;

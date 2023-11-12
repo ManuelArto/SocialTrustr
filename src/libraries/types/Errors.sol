@@ -9,6 +9,7 @@ library Errors {
     error NewsEvaluation_NewsValidationPeriodEnded();
     error NewsEvaluation_CannotEvaluateForwardedNews();
     error NewsEvaluation_UpkeepNotNeeded();
+    error NewsEvaluation_AlreadyVoted();
 
     error TrustToken_UserAlreadyHasBadge();
     error TrustToken_NotEnoughETH(uint);

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import "../src/libraries/DataTypes.sol";
 import {Script, console} from "forge-std/Script.sol";
 import {NewsSharing} from "../src/NewsSharing.sol";
 import {DevOpsTools} from "../lib/foundry-devops/src/DevOpsTools.sol";
+import "../src/libraries/types/DataTypes.sol";
 
 contract NewsSharingInteractions is Script {
     function shareNews(

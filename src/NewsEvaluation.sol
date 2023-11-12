@@ -5,15 +5,17 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {NewsSharing} from "./NewsSharing.sol";
 import {TrustToken} from "./TrustToken.sol";
-import {NewsEvaluationCalculator} from "./libraries/NewsEvaluationCalculator.sol";
-import "./libraries/DataTypes.sol";
-import "./libraries/Events.sol";
-import "./libraries/Errors.sol";
+import {NewsEvaluationCalculator} from "./libraries/services/NewsEvaluationCalculator.sol";
+import {TokenAndTrustnessTuning} from "./libraries/services/TokenAndTrustnessTuning.sol";
+import "./libraries/types/DataTypes.sol";
+import "./libraries/types/Events.sol";
+import "./libraries/types/Errors.sol";
 
 contract NewsEvaluation is Ownable {
     TrustToken private immutable i_trustToken;
 
     mapping(uint => DataTypes.NewsValidation) private s_newsValidations;
+    mapping (uint => mapping (address => bool)) private s_usersHasVoted;
     NewsSharing private s_newsSharing;
 
     uint public constant DEADLINE = 24 hours;
@@ -29,7 +31,10 @@ contract NewsEvaluation is Ownable {
         bool evaluation,
         uint confidence
     ) external {
-        if (newsId == 0) {
+        if (s_usersHasVoted[newsId][msg.sender]) {
+            revert Errors.NewsEvaluation_AlreadyVoted();
+        }
+        if (newsId == 0 || newsId > s_newsSharing.getTotalNews()) {
             revert Errors.NewsEvaluation_InvalidNewsId();
         }
         if (s_newsSharing.isForwarded(newsId)) {
@@ -42,7 +47,8 @@ contract NewsEvaluation is Ownable {
         }
 
         i_trustToken.stakeTRS(msg.sender, address(this), i_trustToken.TRS_FOR_EVALUATION());
-
+        
+        s_usersHasVoted[newsId][msg.sender] = true;
         newsValidation.evaluations.push(
             DataTypes.Evaluation(msg.sender, evaluation, confidence)
         );
@@ -79,24 +85,24 @@ contract NewsEvaluation is Ownable {
         if (!hasMinimumVotes) {
             newsValidation.status = DataTypes.EvaluationStatus.NotVerified;
             response = "Evaluation failed: Not enough votes";
-            NewsEvaluationCalculator.returnStake(newsValidation, i_trustToken);
-            return (response, false, 0);
+            TokenAndTrustnessTuning.returnStake(newsValidation, i_trustToken);
+            return (response, false, 0, false);
         }
 
         newsValidation.status = DataTypes.EvaluationStatus.Evaluated;
         (evaluation, confidence, valid) = NewsEvaluationCalculator.getFinalEvaluation(newsValidation, i_trustToken);
         if (!valid) {
-            NewsEvaluationCalculator.returnStake(newsValidation, i_trustToken);
+            TokenAndTrustnessTuning.returnStake(newsValidation, i_trustToken);
             newsValidation.status = DataTypes.EvaluationStatus.NotVerified;
             response = "Evaluation failed: Tie";
-            return (response, false, 0);
+            return (response, false, 0, valid);
         }
 
         newsValidation.finalEvaluation = DataTypes.FinalEvaluation(evaluation, confidence);
-        NewsEvaluationCalculator.tuneTrustnessAndTrustToken(newsValidation, i_trustToken);
+        TokenAndTrustnessTuning.tuneTrustnessAndTrustToken(newsValidation, i_trustToken);
 
         response = "Evaluated";
-        return (response, evaluation, confidence);
+        return (response, evaluation, confidence, valid);
     }
 
     function setNewsSharingContract(NewsSharing _newsSharing) external onlyOwner {

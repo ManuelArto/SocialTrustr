@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import "../../src/libraries/DataTypes.sol";
-import "../../src/libraries/Events.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {NewsEvaluation} from "../../src/NewsEvaluation.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
 import {TrustToken} from "../../src/TrustToken.sol";
+import {TokenAndTrustnessTuning} from "../../src/libraries/services/TokenAndTrustnessTuning.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
+import "../../src/libraries/types/DataTypes.sol";
+import "../../src/libraries/types/Events.sol";
 
 contract NewsEvaluationTest is Test {
     NewsEvaluation newsEvaluation;
@@ -38,6 +39,12 @@ contract NewsEvaluationTest is Test {
         newsEvaluation.evaluateNews(newsId, true, 50);
     }
 
-    function testUserCannotEvaluateNewsIfNotEvaluationTime() public shareNews {
+    function testUserCannotEvaluateNewsIfNotEvaluationTime() public {
     }
+
+    function testLogarithm() public shareNews {
+        // TokenAndTrustnessTuning.calculateEntropy1();
+        TokenAndTrustnessTuning.calculateEntropy();
+    }
+
 }
