@@ -176,7 +176,7 @@ contract TrustToken is ERC20 {
         uint256 amount
     ) internal virtual override {
         super._update(from, to, amount);
-        if (to == address(this)) {
+        if (to == address(this) && !s_admins[from]) {
             uint ethToSend = convertTRStoETH(amount);
             sendETH(from, ethToSend);
             if (balanceOf(from) == 0) {

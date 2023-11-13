@@ -108,17 +108,15 @@ library TokenAndTrustLevelTuning {
         DataTypes.FinalEvaluation memory finalEvaluation = _newsValidation.finalEvaluation;
         DataTypes.Evaluation[] memory evaluations = _newsValidation.evaluations;
 
-        uint totalConfidence;
+        uint totalConfidence = 0;
         uint trsPunishments;
         uint trsForSharing = _trustToken.TRS_FOR_SHARING();
         uint trsForEvaluation = _trustToken.TRS_FOR_EVALUATION();
 
         if (finalEvaluation.evaluation) {
-            totalConfidence = 100;
             trsPunishments = 0;
             _trustToken.transfer(_sharer, trsForSharing);
         } else {
-            totalConfidence = 0;
             trsPunishments = trsForSharing;
         }
 
@@ -215,15 +213,34 @@ library TokenAndTrustLevelTuning {
         uint totalConfidence,
         TrustToken _trustToken
     ) internal {
-        uint trsReward = (100 * _trsPunishment) / totalConfidence;
-        _trustToken.transfer(_sharer, trsReward);
+        uint totalTrsRewarded = 0;
+
+        // Sharer Reward only if true news
+        if (_finalEvaluation) {
+            totalConfidence += 100;
+            uint trsReward = (100 * _trsPunishment) / totalConfidence;
+            totalTrsRewarded += trsReward;
+
+            _trustToken.transfer(_sharer, trsReward);
+        }
 
         for (uint i = 0; i < _evaluations.length; i++) {
             DataTypes.Evaluation memory evaluation = _evaluations[i];
             if (evaluation.evaluation == _finalEvaluation) {
-                trsReward = (evaluation.confidence * _trsPunishment) / totalConfidence;
+                uint trsReward = (evaluation.confidence * _trsPunishment) / totalConfidence;
                 _trustToken.transfer(_evaluations[i].evaluator, trsReward);
+                totalTrsRewarded += trsReward;
             }
+        }
+
+        // TODO Decide what to do with remaming TRS:
+            // 1. Redirect the remaining TRS reward to the Sharer if true news OR to funds
+            // 2. Add decimals to TRS Token
+
+        if (_finalEvaluation) {
+            _trustToken.transfer(_sharer, _trsPunishment - totalTrsRewarded);
+        } else {
+            _trustToken.transfer(address(_trustToken), _trsPunishment - totalTrsRewarded);
         }
     }
 

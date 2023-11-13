@@ -82,17 +82,22 @@ contract NewsEvaluationTest is Test {
             console.log("[USER%s] TrustLevel: %s, TRS: %s", i+1, trustToken.getTrustLevel(USERS[i]), trustToken.balanceOf(USERS[i]));
         }
 
+        console.log("FUNDS TRS: %s", trustToken.getFundsTRS());
+        console.log("NewsEvaluation TRS: %s", trustToken.balanceOf(address(newsEvaluation)));
+
         assertEq(trustToken.getTrustLevel(USERS[0]), 51);
         assertEq(trustToken.getTrustLevel(USERS[1]), 51);
         assertEq(trustToken.getTrustLevel(USERS[2]), 51);
         assertEq(trustToken.getTrustLevel(USERS[3]), 48);
         assertEq(trustToken.getTrustLevel(USERS[4]), 48);
 
-        assertEq(trustToken.balanceOf(USERS[0]), 553);
+        assertEq(trustToken.balanceOf(USERS[0]), 555);
         assertEq(trustToken.balanceOf(USERS[1]), 553);
         assertEq(trustToken.balanceOf(USERS[2]), 542);
         assertEq(trustToken.balanceOf(USERS[3]), 430);
         assertEq(trustToken.balanceOf(USERS[4]), 420);
+        assertEq(trustToken.balanceOf(address(newsEvaluation)), 0);
+        assertEq(trustToken.getFundsTRS(), 0);
 
         vm.stopPrank();
     }
