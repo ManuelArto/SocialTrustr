@@ -6,7 +6,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {NewsSharing} from "./NewsSharing.sol";
 import {TrustToken} from "./TrustToken.sol";
 import {NewsEvaluationCalculator} from "./libraries/services/NewsEvaluationCalculator.sol";
-import {TokenAndTrustnessTuning} from "./libraries/services/TokenAndTrustnessTuning.sol";
+import {TokenAndTrustLevelTuning} from "./libraries/services/TokenAndTrustLevelTuning.sol";
 import "./libraries/types/DataTypes.sol";
 import "./libraries/types/Events.sol";
 import "./libraries/types/Errors.sol";
@@ -14,7 +14,7 @@ import "./libraries/types/Errors.sol";
 contract NewsEvaluation is Ownable {
     TrustToken private immutable i_trustToken;
 
-    mapping(uint => DataTypes.NewsValidation) private s_newsValidations;
+    mapping(uint => DataTypes.NewsValidation) public s_newsValidations; // TODO: should be changed to private, public for NewsEvaluationTest:testTuneTrustLevelAndTrustToken
     mapping (uint => mapping (address => bool)) private s_usersHasVoted;
     NewsSharing private s_newsSharing;
 
@@ -79,27 +79,27 @@ contract NewsEvaluation is Ownable {
             revert Errors.NewsEvaluation_UpkeepNotNeeded();
         }
         
-        DataTypes.NewsValidation storage newsValidation = s_newsValidations[newsId];
+        DataTypes.NewsValidation memory newsValidation = s_newsValidations[newsId];
 
         bool hasMinimumVotes = newsValidation.evaluations.length > i_trustToken.trustedUsers() / 2;
         if (!hasMinimumVotes) {
             newsValidation.status = DataTypes.EvaluationStatus.NotVerified;
             response = "Evaluation failed: Not enough votes";
-            TokenAndTrustnessTuning.returnStake(newsValidation, i_trustToken);
+            TokenAndTrustLevelTuning.returnStake(s_newsSharing.getSharerOf(newsId), newsValidation, i_trustToken);
             return (response, false, 0, false);
         }
 
         newsValidation.status = DataTypes.EvaluationStatus.Evaluated;
         (evaluation, confidence, valid) = NewsEvaluationCalculator.getFinalEvaluation(newsValidation, i_trustToken);
         if (!valid) {
-            TokenAndTrustnessTuning.returnStake(newsValidation, i_trustToken);
+            TokenAndTrustLevelTuning.returnStake(s_newsSharing.getSharerOf(newsId), newsValidation, i_trustToken);
             newsValidation.status = DataTypes.EvaluationStatus.NotVerified;
             response = "Evaluation failed: Tie";
             return (response, false, 0, valid);
         }
 
         newsValidation.finalEvaluation = DataTypes.FinalEvaluation(evaluation, confidence);
-        TokenAndTrustnessTuning.tuneTrustnessAndTrustToken(newsValidation, i_trustToken);
+        TokenAndTrustLevelTuning.tuneTrustLevelAndTrustToken(s_newsSharing.getSharerOf(newsId), newsValidation, i_trustToken);
 
         response = "Evaluated";
         return (response, evaluation, confidence, valid);
@@ -114,12 +114,16 @@ contract NewsEvaluation is Ownable {
     function getNewsValidation(
         uint newsId
     ) public view returns (DataTypes.EvaluationStatus, DataTypes.FinalEvaluation memory, uint) {
-        DataTypes.NewsValidation storage newsValidation = s_newsValidations[newsId];
+        DataTypes.NewsValidation memory newsValidation = s_newsValidations[newsId];
 
         return (
             newsValidation.status,
             newsValidation.finalEvaluation,
             newsValidation.evaluations.length
         );
+    }
+
+    function getNewsValidationStruct(uint newsId) public view returns (DataTypes.NewsValidation memory) {
+        return s_newsValidations[newsId];
     }
 }

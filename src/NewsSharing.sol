@@ -56,6 +56,10 @@ contract NewsSharing is Ownable {
         news = s_news[index];
     }
 
+    function getSharerOf(uint index) public view returns (address sharer) {
+        sharer = s_news[index].sharer;
+    }
+
     function isForwarded(uint index) public view returns (bool forwarded) {
         forwarded = s_news[index].isForwarded;
     }

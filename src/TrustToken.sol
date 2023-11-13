@@ -11,7 +11,7 @@ contract TrustToken is ERC20 {
     using PriceConverter for uint256;
     
     AggregatorV3Interface private s_priceFeed;
-    mapping(address => uint) public s_trustness; // Range [0, 100]
+    mapping(address => uint) public s_trustLevel; // Range [0, 100]
     mapping(address => bool) public s_admins;
     mapping(address => bool) public s_blacklist;
     
@@ -70,7 +70,7 @@ contract TrustToken is ERC20 {
             sendETH(msg.sender, excess);
         }
 
-        s_trustness[msg.sender] = 50;
+        s_trustLevel[msg.sender] = 50;
         trustedUsers++;
     }
 
@@ -89,6 +89,8 @@ contract TrustToken is ERC20 {
 
         _transfer(address(this), msg.sender, trsAmount);
     }
+
+    /* ONLY FOR ADMINS */ 
 
     /**
      * @dev Stake TRS tokens to a contract address. Given back or tuned after News Validation. Only for admins.
@@ -111,6 +113,11 @@ contract TrustToken is ERC20 {
     function removeAdmin(address admin) external onlyAdmins {
         s_admins[admin] = false;
     }
+
+    function setTrustLevel(address user, uint trustLevel) external onlyAdmins {
+        s_trustLevel[user] = trustLevel;
+    }
+
 
     /**
      * @dev Get the TRS balance of the contract.
@@ -145,7 +152,7 @@ contract TrustToken is ERC20 {
     }
 
     function getTrustLevel(address user) public view returns (uint) {
-        return s_trustness[user];
+        return s_trustLevel[user];
     }
 
     /* INTERNAL FUNCTIONS */
