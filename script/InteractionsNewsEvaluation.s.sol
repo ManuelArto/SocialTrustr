@@ -40,11 +40,11 @@ contract NewsEvaluationInteractions is Script {
         uint newsId,
         bool evaluation,
         uint confidence
-    ) external startBroadcast {
+    ) external {
         evaluateNews(getNewsEvaluationContract(), newsId, evaluation, confidence);
     }
 
-    function getNewsValidation(uint newsId) external startBroadcast returns (
+    function getNewsValidation(uint newsId) external returns (
         DataTypes.EvaluationStatus status,
         DataTypes.FinalEvaluation memory finalEvaluation,
         uint evaluationsCount

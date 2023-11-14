@@ -54,7 +54,7 @@ contract HelperConfig is Script {
 
         anvilNetworkConfig = NetworkConfig({
             priceFeed: address(mockPriceFeed),
-            deadline: 2 seconds
+            deadline: 30 seconds
         });
     }
 }

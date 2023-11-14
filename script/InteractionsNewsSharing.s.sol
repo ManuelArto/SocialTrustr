@@ -44,15 +44,15 @@ contract NewsSharingInteractions is Script {
         string calldata ipfsCid,
         string calldata chatName,
         uint parentId
-    ) external startBroadcast {
+    ) external {
         shareNews(getNewsSharingAddress(), title, ipfsCid, chatName, parentId);
     }
 
-    function getNews(uint id) external startBroadcast returns(DataTypes.News memory news) {
+    function getNews(uint id) external returns(DataTypes.News memory news) {
         return getNews(getNewsSharingAddress(), id);
     }
 
-    function getTotalNews() external startBroadcast returns(uint length) {
+    function getTotalNews() external returns(uint length) {
         return getTotalNews(getNewsSharingAddress());
     }
 
