@@ -6,7 +6,7 @@ dataSources:
     name: NewsSharing
     network: mainnet
     source:
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      address: "0x712516e61C8B383dF4A63CFe83d7701Bce54B03e"
       abi: NewsSharing
       startBlock: 0
     mapping:
@@ -27,7 +27,7 @@ dataSources:
     name: NewsEvaluation
     network: mainnet
     source:
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      address: "0xbCF26943C0197d2eE0E5D05c716Be60cc2761508"
       abi: NewsEvaluation
       startBlock: 0
     mapping:
@@ -41,8 +41,6 @@ dataSources:
         - name: NewsEvaluation
           file: ./abis/NewsEvaluation.json
       eventHandlers:
-        - event: NewsEvaluated(indexed uint256,indexed address,bool,uint256,uint256)
+        - event: NewsEvaluated(indexed uint256,uint8,bool,uint256,uint256)
           handler: handleNewsEvaluated
-        - event: NewsValidationStarted(indexed uint256,indexed address,uint256)
-          handler: handleNewsValidationStarted
       file: ./src/news-evaluation.ts

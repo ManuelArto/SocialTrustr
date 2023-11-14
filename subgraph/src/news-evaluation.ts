@@ -1,11 +1,17 @@
-import { BigInt, store } from "@graphprotocol/graph-ts";
+import { NewsEvaluated as NewsEvaluatedEvent } from "../generated/NewsEvaluation/NewsEvaluation"
+import { Evaluation } from "../generated/schema"
+import { EvaluationStatus } from "./model/evaluation-status"
 
-import { NewsEvaluated as NewsEvaluatedEvent, NewsValidationStarted as NewsValidationStartedEvent } from "../generated/NewsEvaluation/NewsEvaluation"
-import { NewsEntry, Evaluation } from "../generated/schema"
-
-
-export function handleNewsValidationStarted(event: NewsValidationStartedEvent): void {
-}
 
 export function handleNewsEvaluated(event: NewsEvaluatedEvent): void {
+    let evaluation = Evaluation.load(event.params.id.toString())
+    if (evaluation == null) {
+        return;
+    }
+
+    evaluation.evaluation = event.params.evaluation
+    evaluation.confidence = event.params.confidence
+    evaluation.status = EvaluationStatus.toEvaluationStatus(event.params.status)
+    evaluation.evaluationsCount = event.params.evaluationsCount
+    evaluation.save()
 }

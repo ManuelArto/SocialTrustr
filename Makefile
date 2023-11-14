@@ -61,6 +61,12 @@ evaluateNews:
 getNewsValidation:
 	@forge script script/InteractionsNewsEvaluation.s.sol:NewsEvaluationInteractions --sig "getNewsValidation(uint)" $(ARGS) $(NETWORK_ARGS)
 
+closeNewsValidation:
+	@forge script script/InteractionsNewsEvaluation.s.sol:NewsEvaluationInteractions --sig "closeNewsValidation(uint)" $(ARGS) $(NETWORK_ARGS)
+
+checkNewsValidation:
+	@forge script script/InteractionsNewsEvaluation.s.sol:NewsEvaluationInteractions --sig "checkNewsValidation(uint)" $(ARGS) $(NETWORK_ARGS)
+
 # TRUST TOKEN
 buyBadge:
 	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "buyBadge()" $(NETWORK_ARGS)
