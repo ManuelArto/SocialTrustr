@@ -15,12 +15,12 @@ contract DeployScript is Script {
         HelperConfig helperConfig
     ) {
         helperConfig = new HelperConfig();
-        address ethUsdPriceeFeed = helperConfig.activeNetworkConfig();
+        (address ethUsdPriceeFeed, uint deadline) = helperConfig.activeNetworkConfig();
 
         vm.startBroadcast();
         trustToken = new TrustToken(ethUsdPriceeFeed);
         newsSharing = new NewsSharing(trustToken);
-        newsEvaluation = new NewsEvaluation(trustToken);
+        newsEvaluation = new NewsEvaluation(trustToken, deadline);
         // Add contract to each oher
         newsEvaluation.setNewsSharingContract(newsSharing);
         newsSharing.setNewsEvaluationContract(newsEvaluation);

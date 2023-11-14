@@ -5,8 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {NewsEvaluation} from "../../src/NewsEvaluation.sol";
 import {NewsSharing} from "../../src/NewsSharing.sol";
 import {TrustToken} from "../../src/TrustToken.sol";
-import {TokenAndTrustLevelTuning} from "../../src/libraries/services/TokenAndTrustLevelTuning.sol";
-import {NewsEvaluationCalculator} from "../../src/libraries/services/NewsEvaluationCalculator.sol";
+import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
 import "../../src/libraries/types/DataTypes.sol";
 import "../../src/libraries/types/Events.sol";
@@ -15,16 +14,20 @@ contract NewsEvaluationTest is Test {
     NewsEvaluation newsEvaluation;
     NewsSharing newsSharing;
     TrustToken trustToken;
+    HelperConfig helperConfig;
+    
+    uint deadline;
 
     string public constant TITLE = "TITLE";
     string public constant IPFSCID = "123456";
     string public constant CHATNAME = "CHATNAME";
-    uint public constant DEADLINE = 24 hours;
     address[5] USERS = [ makeAddr("user1"), makeAddr("user2"), makeAddr("user3"), makeAddr("user4"), makeAddr("user5")];
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, newsEvaluation, trustToken, ) = deployer.run();
+        (newsSharing, newsEvaluation, trustToken, helperConfig) = deployer.run();
+        (, deadline) = helperConfig.activeNetworkConfig();
+
         trustToken.buyBadge{value: trustToken.getBadgePrice()}();
         for (uint i = 0; i < USERS.length; i++) {
             vm.deal(USERS[i], 1000 ether);
@@ -43,9 +46,6 @@ contract NewsEvaluationTest is Test {
     }
 
     function testUserCanEvaluateNews() public shareNews {
-        vm.expectEmit();
-        emit Events.NewsEvaluated(newsId, address(this), true, 50, 1);
-        
         newsEvaluation.evaluateNews(newsId, true, 50);
     }
 
@@ -63,19 +63,15 @@ contract NewsEvaluationTest is Test {
         newsEvaluation.evaluateNews(newsId, false, 80);
 
         vm.startPrank(address(newsEvaluation));
+        vm.warp(deadline*2);
 
-         // TODO: should call newsvaluation.closeNewsValidation(newsId)
-
-        DataTypes.NewsValidation memory newsValidation = newsEvaluation.getNewsValidationStruct(newsId);
-
-        (bool evaluation, uint confidence, bool valid) = NewsEvaluationCalculator.getFinalEvaluation(newsValidation, trustToken);
-        console.log("evaluation: %s, confidence: %s, valid: %s", evaluation, confidence, valid);
+        (string memory response, bool evaluation, uint confidence, bool valid) = newsEvaluation.closeNewsValidation(newsId);
+        
+        console.log("Response: ", response);
+        console.log("Evaluation: %s, Confidence: %s, Valid: %s", evaluation, confidence, valid);
         assertEq(evaluation, true);
         assertEq(confidence, 90);
         assertEq(valid, true);
-
-        newsValidation.finalEvaluation = DataTypes.FinalEvaluation(evaluation, confidence);
-        TokenAndTrustLevelTuning.tuneTrustLevelAndTrustToken(newsSharing.getSharerOf(newsId), newsValidation, trustToken);
 
         // Read trustLevels and trustTokens
         for (uint i = 0; i < USERS.length; i++) {

@@ -7,6 +7,7 @@ import {Script} from "forge-std/Script.sol";
 contract HelperConfig is Script {
     struct NetworkConfig {
         address priceFeed;
+        uint deadline;
     }
     NetworkConfig public activeNetworkConfig;
 
@@ -23,18 +24,26 @@ contract HelperConfig is Script {
         }
     }
 
-    function getSepoliaEthConfig() public pure returns (NetworkConfig memory sepoliaNetworkConfig) {
+    function getSepoliaEthConfig()
+        public
+        pure
+        returns (NetworkConfig memory sepoliaNetworkConfig)
+    {
         sepoliaNetworkConfig = NetworkConfig({
-            priceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306 // ETH / USD
+            priceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306, // ETH / USD
+            deadline: 24 hours
         });
     }
 
-    function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory anvilNetworkConfig) {
+    function getOrCreateAnvilEthConfig()
+        public
+        returns (NetworkConfig memory anvilNetworkConfig)
+    {
         // Check to see if we set an active network config
         if (activeNetworkConfig.priceFeed != address(0)) {
             return activeNetworkConfig;
         }
-        
+
         vm.startBroadcast();
         MockV3Aggregator mockPriceFeed = new MockV3Aggregator(
             DECIMALS,
@@ -43,6 +52,9 @@ contract HelperConfig is Script {
         vm.stopBroadcast();
         emit HelperConfig__CreatedMockPriceFeed(address(mockPriceFeed));
 
-        anvilNetworkConfig = NetworkConfig({priceFeed: address(mockPriceFeed)});
+        anvilNetworkConfig = NetworkConfig({
+            priceFeed: address(mockPriceFeed),
+            deadline: 2 seconds
+        });
     }
 }

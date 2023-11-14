@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
+import "./DataTypes.sol";
+
 library Events {
     event NewsCreated(
         uint indexed id,
@@ -13,7 +15,7 @@ library Events {
 
     event NewsEvaluated(
         uint indexed id,
-        address indexed evaluator,
+        DataTypes.EvaluationStatus status,
         bool evaluation,
         uint confidence,
         uint evaluationsCount

@@ -15,8 +15,9 @@ library DataTypes {
 
     enum EvaluationStatus {
         Evaluating,
-        NotVerified,
-        Evaluated
+        Evaluated,
+        NotVerified_NotEnoughVotes,
+        NotVerified_EvaluationEndedInATie
     }
 
     struct FinalEvaluation {

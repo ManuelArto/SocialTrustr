@@ -13,17 +13,18 @@ import "./libraries/types/Errors.sol";
 
 contract NewsEvaluation is Ownable {
     TrustToken private immutable i_trustToken;
+    uint public immutable i_deadline;
 
-    mapping(uint => DataTypes.NewsValidation) public s_newsValidations; // TODO: should be changed to private, public for NewsEvaluationTest:testTuneTrustLevelAndTrustToken
+    mapping(uint => DataTypes.NewsValidation) private s_newsValidations;
     mapping (uint => mapping (address => bool)) private s_usersHasVoted;
     NewsSharing private s_newsSharing;
 
-    uint public constant DEADLINE = 24 hours;
     
     /* Functions */
 
-    constructor(TrustToken _trustToken) Ownable(msg.sender) {
+    constructor(TrustToken _trustToken, uint _deadline) Ownable(msg.sender) {
         i_trustToken = _trustToken;
+        i_deadline = _deadline;
     }
 
     function evaluateNews(
@@ -52,21 +53,13 @@ contract NewsEvaluation is Ownable {
         newsValidation.evaluations.push(
             DataTypes.Evaluation(msg.sender, evaluation, confidence)
         );
-
-        emit Events.NewsEvaluated(
-            newsId,
-            msg.sender,
-            evaluation,
-            confidence,
-            newsValidation.evaluations.length
-        );
     }
 
     function checkNewsValidation(uint newsId) public view returns (bool upkeepNeeded) {
         DataTypes.News memory news = s_newsSharing.getNews(newsId);
 
         bool isEvaluating = s_newsValidations[newsId].status == DataTypes.EvaluationStatus.Evaluating;
-        bool timePassed = block.timestamp - news.timestamp >= DEADLINE;
+        bool timePassed = block.timestamp - news.timestamp >= i_deadline;
 
         upkeepNeeded = (isEvaluating && timePassed);
         return upkeepNeeded;
@@ -83,9 +76,11 @@ contract NewsEvaluation is Ownable {
 
         bool hasMinimumVotes = newsValidation.evaluations.length > i_trustToken.trustedUsers() / 2;
         if (!hasMinimumVotes) {
-            newsValidation.status = DataTypes.EvaluationStatus.NotVerified;
-            response = "Evaluation failed: Not enough votes";
+            newsValidation.status = DataTypes.EvaluationStatus.NotVerified_NotEnoughVotes;
             TokenAndTrustLevelTuning.returnStake(s_newsSharing.getSharerOf(newsId), newsValidation, i_trustToken);
+
+            emit Events.NewsEvaluated(newsId, newsValidation.status, false, 0, newsValidation.evaluations.length);
+            response = "Evaluation failed: Not enough votes";
             return (response, false, 0, false);
         }
 
@@ -93,14 +88,18 @@ contract NewsEvaluation is Ownable {
         (evaluation, confidence, valid) = NewsEvaluationCalculator.getFinalEvaluation(newsValidation, i_trustToken);
         if (!valid) {
             TokenAndTrustLevelTuning.returnStake(s_newsSharing.getSharerOf(newsId), newsValidation, i_trustToken);
-            newsValidation.status = DataTypes.EvaluationStatus.NotVerified;
+            newsValidation.status = DataTypes.EvaluationStatus.NotVerified_EvaluationEndedInATie;
+
+            emit Events.NewsEvaluated(newsId, newsValidation.status, false, 0, newsValidation.evaluations.length);
             response = "Evaluation failed: Tie";
             return (response, false, 0, valid);
         }
 
         newsValidation.finalEvaluation = DataTypes.FinalEvaluation(evaluation, confidence);
+        newsValidation.status = DataTypes.EvaluationStatus.Evaluated;
         TokenAndTrustLevelTuning.tuneTrustLevelAndTrustToken(s_newsSharing.getSharerOf(newsId), newsValidation, i_trustToken);
 
+        emit Events.NewsEvaluated(newsId, newsValidation.status, evaluation, confidence, newsValidation.evaluations.length);
         response = "Evaluated";
         return (response, evaluation, confidence, valid);
     }
@@ -121,9 +120,5 @@ contract NewsEvaluation is Ownable {
             newsValidation.finalEvaluation,
             newsValidation.evaluations.length
         );
-    }
-
-    function getNewsValidationStruct(uint newsId) public view returns (DataTypes.NewsValidation memory) {
-        return s_newsValidations[newsId];
     }
 }
