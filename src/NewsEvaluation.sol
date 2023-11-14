@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
+import {console} from "forge-std/console.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {NewsSharing} from "./NewsSharing.sol";
@@ -27,16 +28,20 @@ contract NewsEvaluation is Ownable {
         i_deadline = _deadline;
     }
 
+    modifier validNews(uint newsId) {
+        if (newsId == 0 || newsId > s_newsSharing.getTotalNews()) {
+            revert Errors.NewsEvaluation_InvalidNewsId();
+        }
+        _;
+    }
+
     function evaluateNews(
         uint newsId,
         bool evaluation,
         uint confidence
-    ) external {
+    ) external validNews(newsId) {
         if (s_usersHasVoted[newsId][msg.sender]) {
             revert Errors.NewsEvaluation_AlreadyVoted();
-        }
-        if (newsId == 0 || newsId > s_newsSharing.getTotalNews()) {
-            revert Errors.NewsEvaluation_InvalidNewsId();
         }
         if (s_newsSharing.isForwarded(newsId)) {
             revert Errors.NewsEvaluation_CannotEvaluateForwardedNews();
@@ -55,7 +60,7 @@ contract NewsEvaluation is Ownable {
         );
     }
 
-    function checkNewsValidation(uint newsId) public view returns (bool upkeepNeeded) {
+    function checkNewsValidation(uint newsId) public validNews(newsId) view returns (bool upkeepNeeded) {
         DataTypes.News memory news = s_newsSharing.getNews(newsId);
 
         bool isEvaluating = s_newsValidations[newsId].status == DataTypes.EvaluationStatus.Evaluating;
@@ -63,45 +68,46 @@ contract NewsEvaluation is Ownable {
 
         upkeepNeeded = (isEvaluating && timePassed);
         return upkeepNeeded;
-
     }
 
-    function closeNewsValidation(uint newsId) external returns (string memory response, bool evaluation, uint confidence, bool valid) {
-        bool upkeepNeeded = checkNewsValidation(newsId);
-        if (!upkeepNeeded) {
+    function closeNewsValidation(uint newsId) external validNews(newsId) returns (string memory response, bool evaluation, uint confidence, bool valid) {
+        bool isUpkeepNeeded = checkNewsValidation(newsId);
+        if (!isUpkeepNeeded) {
             revert Errors.NewsEvaluation_UpkeepNotNeeded();
         }
         
-        DataTypes.NewsValidation memory newsValidation = s_newsValidations[newsId];
+        DataTypes.NewsValidation storage validation = s_newsValidations[newsId];
+        uint trustedUsers = i_trustToken.trustedUsers();
 
-        bool hasMinimumVotes = newsValidation.evaluations.length > i_trustToken.trustedUsers() / 2;
-        if (!hasMinimumVotes) {
-            newsValidation.status = DataTypes.EvaluationStatus.NotVerified_NotEnoughVotes;
-            TokenAndTrustLevelTuning.returnStake(s_newsSharing.getSharerOf(newsId), newsValidation, i_trustToken);
+        // Check if there are enough evaluations to make a decision
+        if (trustedUsers <= 1 || (validation.evaluations.length < trustedUsers / 2)) {
+            validation.status = DataTypes.EvaluationStatus.NotVerified_NotEnoughVotes;
+            TokenAndTrustLevelTuning.returnStake(s_newsSharing.getSharerOf(newsId), validation, i_trustToken);
 
-            emit Events.NewsEvaluated(newsId, newsValidation.status, false, 0, newsValidation.evaluations.length);
-            response = "Evaluation failed: Not enough votes";
-            return (response, false, 0, false);
+            emit Events.NewsEvaluated(newsId, validation.status, false, 0, validation.evaluations.length);
+            return ("Evaluation failed: Not enough votes", false, 0, false);
         }
 
-        newsValidation.status = DataTypes.EvaluationStatus.Evaluated;
-        (evaluation, confidence, valid) = NewsEvaluationCalculator.getFinalEvaluation(newsValidation, i_trustToken);
+        (evaluation, confidence, valid) = NewsEvaluationCalculator.getFinalEvaluation(validation, i_trustToken);
+        console.log("Evaluation: ", evaluation);
+        console.log("Confidence: ", confidence);
+        console.log("Valid: ", valid);
+        
+        // Check if the evaluation is valid
         if (!valid) {
-            TokenAndTrustLevelTuning.returnStake(s_newsSharing.getSharerOf(newsId), newsValidation, i_trustToken);
-            newsValidation.status = DataTypes.EvaluationStatus.NotVerified_EvaluationEndedInATie;
+            TokenAndTrustLevelTuning.returnStake(s_newsSharing.getSharerOf(newsId), validation, i_trustToken);
+            validation.status = DataTypes.EvaluationStatus.NotVerified_EvaluationEndedInATie;
 
-            emit Events.NewsEvaluated(newsId, newsValidation.status, false, 0, newsValidation.evaluations.length);
-            response = "Evaluation failed: Tie";
-            return (response, false, 0, valid);
+            emit Events.NewsEvaluated(newsId, validation.status, false, 0, validation.evaluations.length);
+            return ("Evaluation failed: Tie", false, 0, valid);
         }
 
-        newsValidation.finalEvaluation = DataTypes.FinalEvaluation(evaluation, confidence);
-        newsValidation.status = DataTypes.EvaluationStatus.Evaluated;
-        TokenAndTrustLevelTuning.tuneTrustLevelAndTrustToken(s_newsSharing.getSharerOf(newsId), newsValidation, i_trustToken);
+        validation.finalEvaluation = DataTypes.FinalEvaluation(evaluation, confidence);
+        validation.status = DataTypes.EvaluationStatus.Evaluated;
+        TokenAndTrustLevelTuning.tuneTrustLevelAndTrustToken(s_newsSharing.getSharerOf(newsId), validation, i_trustToken);
 
-        emit Events.NewsEvaluated(newsId, newsValidation.status, evaluation, confidence, newsValidation.evaluations.length);
-        response = "Evaluated";
-        return (response, evaluation, confidence, valid);
+        emit Events.NewsEvaluated(newsId, validation.status, evaluation, confidence, validation.evaluations.length);
+        return ("Evaluated", evaluation, confidence, valid);
     }
 
     function setNewsSharingContract(NewsSharing _newsSharing) external onlyOwner {
