@@ -17,40 +17,90 @@ contract NewsEvaluationInteractions is Script {
         newsEvaluation.evaluateNews(newsId, evaluation, confidence);
     }
 
-    function getNewsValidation(address _contract, uint newsId) public startBroadcast returns (
+    function getNewsValidation(
+        address _contract,
+        uint newsId
+    ) public startBroadcast returns (
         DataTypes.EvaluationStatus status,
         DataTypes.FinalEvaluation memory finalEvaluation,
         uint evaluationsCount
     ) {
         NewsEvaluation newsEvaluation = NewsEvaluation(payable(_contract));
-        (
-            status,
-            finalEvaluation,
-            evaluationsCount
-        ) = newsEvaluation.getNewsValidation(newsId);
+        (status, finalEvaluation, evaluationsCount) = newsEvaluation
+            .getNewsValidation(newsId);
 
         console.log("Status: %s", uint(status));
-        console.log("Final Evaluation: %s, confidence: %s", finalEvaluation.evaluation, finalEvaluation.confidence);
+        console.log(
+            "Final Evaluation: %s, confidence: %s",
+            finalEvaluation.evaluation,
+            finalEvaluation.confidence
+        );
         console.log("Evaluations Count: %s", evaluationsCount);
     }
 
+    function closeNewsValidation(
+        address _contract,
+        uint newsId
+    ) public startBroadcast {
+        NewsEvaluation newsEvaluation = NewsEvaluation(payable(_contract));
+        (
+            string memory response,
+            bool evaluation,
+            uint confidence,
+            bool valid
+        ) = newsEvaluation.closeNewsValidation(newsId);
+
+        console.log("Response: %s", response);
+        console.log("Evaluation: %s", evaluation);
+        console.log("Confidence: %s", confidence);
+        console.log("Valid: %s", valid);
+    }
+
+    function checkNewsValidation(
+        address _contract,
+        uint newsId
+    ) public startBroadcast {
+        NewsEvaluation newsEvaluation = NewsEvaluation(payable(_contract));
+        bool closingNews = newsEvaluation.checkNewsValidation(newsId);
+        console.log("Closing News: %s", closingNews);
+    }
+
     /* OVERLOAD FUNCTIONS */
-    
+
     function evaluateNews(
         uint newsId,
         bool evaluation,
         uint confidence
     ) external {
-        evaluateNews(getNewsEvaluationContract(), newsId, evaluation, confidence);
+        evaluateNews(
+            getNewsEvaluationContract(),
+            newsId,
+            evaluation,
+            confidence
+        );
     }
 
-    function getNewsValidation(uint newsId) external returns (
+    function getNewsValidation(
+        uint newsId
+    ) external returns (
         DataTypes.EvaluationStatus status,
         DataTypes.FinalEvaluation memory finalEvaluation,
         uint evaluationsCount
     ) {
         return getNewsValidation(getNewsEvaluationContract(), newsId);
     }
+
+    function closeNewsValidation(
+        uint newsId
+    ) public {
+        closeNewsValidation(getNewsEvaluationContract(), newsId);
+    } 
+
+    function checkNewsValidation(
+        uint newsId
+    ) public {
+        checkNewsValidation(getNewsEvaluationContract(), newsId);
+    }         
 
     /* INTERNAL FUNCTIONS */
 
@@ -62,7 +112,7 @@ contract NewsEvaluationInteractions is Script {
         return mostRecentlyDeployed;
     }
 
-    modifier startBroadcast {
+    modifier startBroadcast() {
         vm.startBroadcast();
         _;
         vm.stopBroadcast();
