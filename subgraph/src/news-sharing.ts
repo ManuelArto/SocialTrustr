@@ -2,6 +2,7 @@ import { BigInt } from "@graphprotocol/graph-ts";
 
 import { NewsCreated as NewsCreatedEvent } from "../generated/NewsSharing/NewsSharing"
 import { NewsEntry, Evaluation } from "../generated/schema"
+import { EvaluationStatus } from "./model/evaluation-status"
 
 
 export function handleNewsCreated(event: NewsCreatedEvent): void {
@@ -17,7 +18,7 @@ export function handleNewsCreated(event: NewsCreatedEvent): void {
     updateParentForwardedNews(news, event.params.parentNews)
     news.parentNews = event.params.parentNews.toString()
     // Link to parent news evaluation
-    news.evaluation = NewsEntry.load(news.parentNews)!.evaluation;
+    news.evaluation = NewsEntry.load(news.parentNews!)!.evaluation;
   } else {
     news.parentNews = "0"
     news.evaluation = createInitialEvaluation(event).id
@@ -43,7 +44,7 @@ function updateParentForwardedNews(news: NewsEntry, parentId: BigInt): void {
 
 function createInitialEvaluation(event: NewsCreatedEvent): Evaluation {
   let evaluation = new Evaluation(event.params.id.toString());
-  evaluation.status = "Evaluating"
+  evaluation.status = EvaluationStatus.Evaluating
 
   evaluation.save()
   return evaluation;
