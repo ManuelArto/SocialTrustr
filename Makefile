@@ -2,8 +2,13 @@
 
 .PHONY: all test clean deploy fund help install snapshot format anvil 
 
-DEFAULT_ANVIL_KEY := 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-# 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+# (0) 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+# (1) 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+# (2) 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
+# (3) 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6
+# (4) 0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a
+# (5) 0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba
 DEFAULT_GANACHE_KEY := 0x6377edc0e87761edad999e3cb2e0c17cf82c096dffa37ce3c55ddc04df4fef0e
 
 help:
@@ -71,11 +76,11 @@ checkNewsValidation:
 buyBadge:
 	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "buyBadge()" $(NETWORK_ARGS)
 
-getBalances:
-	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "getBalances()" $(NETWORK_ARGS)
+getInfos:
+	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "getInfos()" $(NETWORK_ARGS)
 
-getBalancesOf:
-	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "getBalances(address)" $(ARGS) $(NETWORK_ARGS)
+getInfosOf:
+	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "getInfos(address)" $(ARGS) $(NETWORK_ARGS)
 
 sellTrustToken:
 	@forge script script/InteractionsTrustToken.s.sol:TrustTokenInteractions --sig "sellTrustToken(uint)" $(ARGS) $(NETWORK_ARGS)
