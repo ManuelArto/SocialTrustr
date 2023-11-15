@@ -14,8 +14,8 @@ contract TrustToken is ERC20 {
     mapping(address => uint) public s_trustLevel; // Range [0, 100]
     mapping(address => bool) public s_admins;
     mapping(address => bool) public s_blacklist;
-    
-    uint public trustedUsers = 0;
+    mapping(address => uint) public s_staked;
+    uint public s_trustedUsers = 0;
 
     // 500 TRS = 50 USD
     uint public constant INITIAL_USD_PRICE = 50;
@@ -24,6 +24,7 @@ contract TrustToken is ERC20 {
     uint public constant USD_FOR_TRS = (INITIAL_USD_PRICE * 1e18) / INITIAL_TRS;
     uint public constant TRS_FOR_EVALUATION = 100;
     uint public constant TRS_FOR_SHARING = 200;
+    uint public constant INITIAL_TRUST_LEVEL = 50;
 
     modifier onlyAdmins() {
         if (!s_admins[msg.sender]) {
@@ -47,12 +48,12 @@ contract TrustToken is ERC20 {
         if (s_blacklist[msg.sender]) {
             revert Errors.TrustToken_UserIsBlacklisted();
         }
-
         if (msg.value.convertETHtoUSD(s_priceFeed) < INITIAL_USD_PRICE) {
             revert Errors.TrustToken_NotEnoughETH(INITIAL_USD_PRICE.convertUSDtoETH(s_priceFeed));
         }
 
         uint toMint = INITIAL_TRS;
+        // Check how many TRS to mint
         if (getFundsTRS() > 0 && getFundsTRS() < INITIAL_TRS) {
             toMint = INITIAL_TRS - getFundsTRS();
             _transfer(address(this), msg.sender, getFundsTRS());
@@ -65,13 +66,14 @@ contract TrustToken is ERC20 {
             _mint(msg.sender, toMint);
         }
 
+        // Send excess ETH
         uint excess = msg.value - convertTRStoETH(INITIAL_TRS);
         if (excess > 0) {
             sendETH(msg.sender, excess);
         }
 
-        s_trustLevel[msg.sender] = 50;
-        trustedUsers++;
+        s_trustLevel[msg.sender] = INITIAL_TRUST_LEVEL;
+        s_trustedUsers++;
     }
 
     /**
@@ -92,14 +94,28 @@ contract TrustToken is ERC20 {
 
     /* ONLY FOR ADMINS */ 
 
+    function transferFromStakeToAdmin(address user, uint amount) external onlyAdmins {
+        _transfer(user, msg.sender, amount);
+        s_staked[user] -= amount;
+    }
+
     /**
-     * @dev Stake TRS tokens to a contract address. Given back or tuned after News Validation. Only for admins.
+     * @dev Stake the amount of TRS tokens. Removed or given back after News Validation. Only for admins.
      * @param user The address of the user staking TRS tokens.
-     * @param contractAddress The address of the contract to stake to.
      * @param amount The amount of TRS tokens to stake.
      */
-    function stakeTRS(address user, address contractAddress, uint amount) external onlyAdmins {
-        _transfer(user, contractAddress, amount);
+    function stakeTRS(address user, uint amount) external onlyAdmins {
+        userHasEnoughTRSAndStake(user, amount);
+        s_staked[user] += amount;
+    }
+
+    /**
+     * @dev Unstake the amount of TRS tokens. Only for admins.
+     * @param user The address of the user unstaking TRS tokens.
+     * @param amount The amount of TRS tokens to unstake.
+     */
+    function unstakeTRS(address user, uint amount) external onlyAdmins {
+        s_staked[user] -= amount;
     }
 
     function addToBlacklist(address user) external onlyAdmins {
@@ -167,6 +183,19 @@ contract TrustToken is ERC20 {
         require(callSuccess, "TrustToken: Failed to send ETH");
     }
 
+    function sendBackETHIfRequired(address from, address to, uint amount) internal {
+        if (to == address(this) && !s_admins[from]) {
+            uint ethToSend = convertTRStoETH(amount);
+            sendETH(from, ethToSend);
+        }
+    }
+
+    function userHasEnoughTRSAndStake(address user, uint amount) internal view {
+        if (balanceOf(user) < amount + s_staked[user]) {
+            revert ERC20InsufficientBalance(user, balanceOf(user) - s_staked[user], amount);
+        }
+    }
+
     /**
      * @dev Override the _update function to send ETH back to the user in exchange for TRS.
      */
@@ -175,12 +204,20 @@ contract TrustToken is ERC20 {
         address to,
         uint256 amount
     ) internal virtual override {
-        super._update(from, to, amount);
-        if (to == address(this) && !s_admins[from]) {
-            uint ethToSend = convertTRStoETH(amount);
-            sendETH(from, ethToSend);
-            if (balanceOf(from) == 0) {
-                trustedUsers--;
+        if (from == address(0)) {
+            super._update(from, to, amount);
+        } else {
+            userHasEnoughTRSAndStake(from, amount);
+
+            if (balanceOf(to) < TRS_FOR_EVALUATION && TRS_FOR_EVALUATION < (balanceOf(to) + amount)) {
+                s_trustedUsers++;
+            }
+
+            super._update(from, to, amount);
+            sendBackETHIfRequired(from, to, amount);
+
+            if (balanceOf(from) < TRS_FOR_EVALUATION) {
+                s_trustedUsers--;
             }
         }
     }

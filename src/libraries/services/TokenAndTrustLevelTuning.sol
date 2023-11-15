@@ -19,13 +19,12 @@ library TokenAndTrustLevelTuning {
         DataTypes.NewsValidation memory _newsValidation,
         TrustToken _trustToken
     ) internal {
-        // sharer
-        _trustToken.transfer(_sharer, _trustToken.TRS_FOR_SHARING());
+        _trustToken.unstakeTRS(_sharer, _trustToken.TRS_FOR_SHARING());
 
         // evaluators
         DataTypes.Evaluation[] memory evaluations = _newsValidation.evaluations;
         for (uint i = 0; i < evaluations.length; i++) {
-            _trustToken.transfer(
+            _trustToken.unstakeTRS(
                 evaluations[i].evaluator,
                 _trustToken.TRS_FOR_EVALUATION()
             );
@@ -115,9 +114,10 @@ library TokenAndTrustLevelTuning {
 
         if (finalEvaluation.evaluation) {
             trsPunishments = 0;
-            _trustToken.transfer(_sharer, trsForSharing);
+            _trustToken.unstakeTRS(_sharer, trsForSharing);
         } else {
             trsPunishments = trsForSharing;
+            _trustToken.transferFromStakeToAdmin(_sharer, trsForSharing);
         }
 
         // Sharer TrustLevel Tuning
@@ -131,18 +131,20 @@ library TokenAndTrustLevelTuning {
             if (userEvaluation.evaluation == finalEvaluation.evaluation) {
                 // TRS Reward
                 totalConfidence += userEvaluation.confidence;
-                _trustToken.transfer(userEvaluation.evaluator, trsForEvaluation);
+                _trustToken.unstakeTRS(userEvaluation.evaluator, trsForEvaluation);
             } else {
                 // TRS Punishemnt
                 uint trsLost = trsForEvaluation * userEvaluation.confidence / 1e2;
+                _trustToken.unstakeTRS(userEvaluation.evaluator, (trsForEvaluation - trsLost));
+                _trustToken.transferFromStakeToAdmin(userEvaluation.evaluator, trsLost);
+                
                 trsPunishments += trsLost;
-                _trustToken.transfer(userEvaluation.evaluator, (100 - trsLost));
             }
         }
 
         // TRS Reward
         distributeTRSReward(_sharer, evaluations, finalEvaluation.evaluation, trsPunishments, totalConfidence, _trustToken); 
-    }    
+    }
     
     /**
      * @dev Adjusts the trust level of a user based on their evaluation, confidence, entropy, and final evaluation.

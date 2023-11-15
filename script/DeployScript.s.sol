@@ -21,12 +21,12 @@ contract DeployScript is Script {
         trustToken = new TrustToken(ethUsdPriceeFeed);
         newsSharing = new NewsSharing(trustToken);
         newsEvaluation = new NewsEvaluation(trustToken, deadline);
-        // Add contract to each oher
+        // Add NewsSharing contract to NewsEvaluation
         newsEvaluation.setNewsSharingContract(newsSharing);
-        newsSharing.setNewsEvaluationContract(newsEvaluation);
-        // Add admins to TrustToken
+        // Add admins to TrustToken and remove this contract
         trustToken.addAdmin(address(newsSharing));
         trustToken.addAdmin(address(newsEvaluation));
+        trustToken.removeAdmin(address(this));
         vm.stopBroadcast();
     }
 }

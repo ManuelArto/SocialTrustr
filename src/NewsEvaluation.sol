@@ -40,6 +40,9 @@ contract NewsEvaluation is Ownable {
         bool evaluation,
         uint confidence
     ) external validNews(newsId) {
+        if (msg.sender == s_newsSharing.getSharerOf(newsId)) {
+            revert Errors.NewsEvaluation_AuthorCannotVote();
+        }
         if (s_usersHasVoted[newsId][msg.sender]) {
             revert Errors.NewsEvaluation_AlreadyVoted();
         }
@@ -52,7 +55,7 @@ contract NewsEvaluation is Ownable {
             revert Errors.NewsEvaluation_NewsValidationPeriodEnded();
         }
 
-        i_trustToken.stakeTRS(msg.sender, address(this), i_trustToken.TRS_FOR_EVALUATION());
+        i_trustToken.stakeTRS(msg.sender, i_trustToken.TRS_FOR_EVALUATION());
         
         s_usersHasVoted[newsId][msg.sender] = true;
         newsValidation.evaluations.push(
@@ -77,7 +80,7 @@ contract NewsEvaluation is Ownable {
         }
         
         DataTypes.NewsValidation storage validation = s_newsValidations[newsId];
-        uint trustedUsers = i_trustToken.trustedUsers();
+        uint trustedUsers = i_trustToken.s_trustedUsers();
 
         // Check if there are enough evaluations to make a decision
         if (trustedUsers <= 1 || (validation.evaluations.length < trustedUsers / 2)) {

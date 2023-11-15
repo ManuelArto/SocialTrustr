@@ -58,14 +58,14 @@ contract TrustTokenInteractions is Script {
     function getInfos(address _address) public startBroadcast {
         TrustToken trs = getTrustTokenContract();
         console.log("----------------------------------------------------");
-        console.log("TRS: %s", trs.balanceOf(_address));
+        console.log("TRS: %s, Staked:", trs.balanceOf(_address), trs.s_staked(_address));
         console.log("ETH: %s", _address.balance);
         console.log("TrustLevel : %s", trs.getTrustLevel(_address));
         console.log("----------------------------------------------------");
         console.log("Contract ETH: %s", address(trs).balance);
         console.log("Contract TRS: %s", trs.getFundsTRS());
         console.log("----------------------------------------------------");
-        console.log("TrustedUsers: %s", trs.trustedUsers());
+        console.log("TrustedUsers: %s", trs.s_trustedUsers());
     }
 
     function logInfos(TrustToken trs, uint previousETH, uint previousTRS, uint fundTRS, uint addressBalance, address _to) internal view {

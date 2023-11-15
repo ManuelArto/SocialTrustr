@@ -2,7 +2,6 @@
 pragma solidity ^0.8.21;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {NewsEvaluation} from "./NewsEvaluation.sol";
 import {TrustToken} from "./TrustToken.sol";
 import "./libraries/types/DataTypes.sol";
 import "./libraries/types/Events.sol";
@@ -12,7 +11,6 @@ contract NewsSharing is Ownable {
     TrustToken private immutable i_trustToken;
 
     DataTypes.News[] private s_news;
-    NewsEvaluation private s_newsEvaluation;
 
     /* Functions */
 
@@ -31,7 +29,7 @@ contract NewsSharing is Ownable {
             revert Errors.NewsSharing_NoParentNewsWithThatId();
         }
 
-        i_trustToken.stakeTRS(msg.sender, address(s_newsEvaluation), i_trustToken.TRS_FOR_SHARING());
+        i_trustToken.stakeTRS(msg.sender, i_trustToken.TRS_FOR_SHARING());
 
         DataTypes.News memory news = DataTypes.News(title, ipfsCid, chatName, msg.sender, parentId != 0, block.timestamp);
         s_news.push(news);
@@ -40,10 +38,6 @@ contract NewsSharing is Ownable {
 
         id = s_news.length - 1;
         emit Events.NewsCreated(id, msg.sender, title, ipfsCid, chatName, parentId);
-    }
-
-    function setNewsEvaluationContract(NewsEvaluation _newsEvaluation) external onlyOwner {
-        s_newsEvaluation = _newsEvaluation;
     }
 
     /** Getter Functions */
