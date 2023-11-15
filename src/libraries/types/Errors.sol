@@ -10,6 +10,7 @@ library Errors {
     error NewsEvaluation_CannotEvaluateForwardedNews();
     error NewsEvaluation_UpkeepNotNeeded();
     error NewsEvaluation_AlreadyVoted();
+    error NewsEvaluation_AuthorCannotVote();
 
     error TrustToken_UserAlreadyHasBadge();
     error TrustToken_NotEnoughETH(uint);
