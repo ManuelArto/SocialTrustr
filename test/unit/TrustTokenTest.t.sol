@@ -3,14 +3,14 @@ pragma solidity ^0.8.21;
 
 import {Test, console} from "forge-std/Test.sol";
 import {TrustToken} from "../../src/TrustToken.sol";
-import {NewsEvaluation} from "../../src/NewsEvaluation.sol";
+import {ContentEvaluation} from "../../src/ContentEvaluation.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
 import "../../src/libraries/types/DataTypes.sol";
 import "../../src/libraries/types/Events.sol";
 
 contract TrustTokenTest is Test {
-    NewsEvaluation newsEvaluation;
+    ContentEvaluation contentEvaluation;
     TrustToken trustToken;
 
     address[5] USERS = [
@@ -23,7 +23,7 @@ contract TrustTokenTest is Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (, newsEvaluation, trustToken, ) = deployer.run();
+        (, contentEvaluation, trustToken, ) = deployer.run();
         vm.deal(address(this), 1000 ether);
     }
 
@@ -62,7 +62,7 @@ contract TrustTokenTest is Test {
     function testStakeTRS() external {
         // Test that an admin can stake TRS tokens for a user
         trustToken.buyBadge{value: trustToken.getBadgePrice()}();
-        vm.prank(address(newsEvaluation));
+        vm.prank(address(contentEvaluation));
         trustToken.stakeTRS(address(this), 10);
         assertEq(trustToken.s_staked(address(this)), 10);
     }
@@ -71,7 +71,7 @@ contract TrustTokenTest is Test {
         // Test that an admin can transfer TRS tokens from a user's stake to their own address
         trustToken.buyBadge{value: trustToken.getBadgePrice()}();
         
-        vm.startPrank(address(newsEvaluation));
+        vm.startPrank(address(contentEvaluation));
         trustToken.stakeTRS(address(this), 10);
         trustToken.transferFromStakeToAdmin(address(this), 10);
         vm.stopPrank();
@@ -83,7 +83,7 @@ contract TrustTokenTest is Test {
     function testUnstakeTRS() external {
         // Test that an admin can unstake TRS tokens for a user
         trustToken.buyBadge{value: trustToken.getBadgePrice()}();
-        vm.startPrank(address(newsEvaluation));
+        vm.startPrank(address(contentEvaluation));
         trustToken.stakeTRS(address(this), 10);
         trustToken.unstakeTRS(address(this), 5);
         vm.stopPrank();
@@ -92,21 +92,21 @@ contract TrustTokenTest is Test {
 
     function testAddToBlacklist() external {
         // Test that an admin can add a user to the blacklist
-        vm.prank(address(newsEvaluation));
+        vm.prank(address(contentEvaluation));
         trustToken.addToBlacklist(address(this));
         assertEq(trustToken.s_blacklist(address(this)), true);
     }
 
     function testAddAdmin() external {
         // Test that an admin can add another admin
-        vm.prank(address(newsEvaluation));
+        vm.prank(address(contentEvaluation));
         trustToken.addAdmin(msg.sender);
         assertEq(trustToken.s_admins(msg.sender), true);
     }
 
     function testRemoveAdmin() external {
         // Test that an admin can remove another admin
-        vm.startPrank(address(newsEvaluation));
+        vm.startPrank(address(contentEvaluation));
         trustToken.addAdmin(msg.sender);
         trustToken.removeAdmin(msg.sender);
         vm.stopPrank();
@@ -115,7 +115,7 @@ contract TrustTokenTest is Test {
 
     function testSetTrustLevel() external {
         // Test that an admin can set the trust level for a user
-        vm.prank(address(newsEvaluation));
+        vm.prank(address(contentEvaluation));
         trustToken.setTrustLevel(address(this), 75);
         assertEq(trustToken.s_trustLevel(address(this)), 75);
     }
@@ -163,7 +163,7 @@ contract TrustTokenTest is Test {
     trustToken.buyBadge{value: trustToken.getBadgePrice()}();
     uint initialTRS = trustToken.INITIAL_TRS();
 
-    vm.startPrank(address(newsEvaluation));
+    vm.startPrank(address(contentEvaluation));
     trustToken.stakeTRS(address(this), initialTRS);
     vm.stopPrank();
     

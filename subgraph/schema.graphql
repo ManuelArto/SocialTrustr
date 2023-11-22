@@ -13,16 +13,16 @@ type Evaluation @entity {
   evaluationsCount: BigInt
 }
 
-type NewsEntry @entity {
+type Content @entity {
   id: ID!
   sender: Bytes!
   title: String!
   ipfsCid: String!
   chatName: String!
-  parentNews: NewsEntry
+  parentContent: Content
   isForwaded: Boolean!
   evaluation: Evaluation!
-  forwarded: [NewsEntry!]
+  forwarded: [Content!]
   # block transaction infos
   blockNumber: BigInt!
   blockTimestamp: BigInt!

@@ -5,21 +5,21 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import {TrustToken} from "../../TrustToken.sol";
 import "../types/DataTypes.sol";
 
-library NewsEvaluationCalculator {
+library ContentEvaluationCalculator {
 
     /**
-     * @dev Get the final evaluation of news validation.
-     * @param _newsValidation The memory struct containing the news validation data.
+     * @dev Get the final evaluation of content validation.
+     * @param _contentValidation The memory struct containing the content validation data.
      * @param _trustToken The TrustToken contract instance.
      * @return result The final evaluation result (true or false).
      * @return averageConfidence The average confidence of the evaluations.
      * @return valid A boolean flag indicating if the evaluation is valid.
      */
     function getFinalEvaluation(
-        DataTypes.NewsValidation memory _newsValidation,
+        DataTypes.ContentValidation memory _contentValidation,
         TrustToken _trustToken
     ) internal view returns (bool result, uint averageConfidence, bool valid) {
-        DataTypes.Evaluation[] memory _evaluations = _newsValidation.evaluations;
+        DataTypes.Evaluation[] memory _evaluations = _contentValidation.evaluations;
 
         (
             DataTypes.TrustScore memory trueScore,

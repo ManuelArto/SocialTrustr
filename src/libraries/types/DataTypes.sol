@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 
 library DataTypes {
 
-    struct News {
+    struct Content {
         string title;
         string ipfsCid;
         string chatName;
@@ -31,7 +31,7 @@ library DataTypes {
         uint confidence;
     }
 
-    struct NewsValidation {
+    struct ContentValidation {
         EvaluationStatus status;
         FinalEvaluation finalEvaluation;
         Evaluation[] evaluations;

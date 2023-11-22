@@ -2,17 +2,17 @@
 pragma solidity ^0.8.21;
 
 import {Test, console} from "forge-std/Test.sol";
-import {NewsEvaluation} from "../../src/NewsEvaluation.sol";
-import {NewsSharing} from "../../src/NewsSharing.sol";
+import {ContentEvaluation} from "../../src/ContentEvaluation.sol";
+import {ContentSharing} from "../../src/ContentSharing.sol";
 import {TrustToken} from "../../src/TrustToken.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
 import "../../src/libraries/types/DataTypes.sol";
 import "../../src/libraries/types/Events.sol";
 
-contract NewsEvaluationTest is Test {
-    NewsEvaluation newsEvaluation;
-    NewsSharing newsSharing;
+contract ContentEvaluationTest is Test {
+    ContentEvaluation contentEvaluation;
+    ContentSharing contentSharing;
     TrustToken trustToken;
     HelperConfig helperConfig;
     
@@ -25,7 +25,7 @@ contract NewsEvaluationTest is Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, newsEvaluation, trustToken, helperConfig) = deployer.run();
+        (contentSharing, contentEvaluation, trustToken, helperConfig) = deployer.run();
         (, deadline) = helperConfig.activeNetworkConfig();
 
         trustToken.buyBadge{value: trustToken.getBadgePrice()}();
@@ -37,35 +37,35 @@ contract NewsEvaluationTest is Test {
         }
     }
 
-    uint newsId;
-    modifier shareNews() {
+    uint contentId;
+    modifier shareContent() {
         vm.startPrank(USERS[0]);
-        newsId = newsSharing.createNews(TITLE, IPFSCID, CHATNAME, 0);
+        contentId = contentSharing.createContent(TITLE, IPFSCID, CHATNAME, 0);
         vm.stopPrank();
         _;
     }
 
-    function testUserCanEvaluateNews() public shareNews {
-        newsEvaluation.evaluateNews(newsId, true, 50);
+    function testUserCanEvaluateContent() public shareContent {
+        contentEvaluation.evaluateContent(contentId, true, 50);
     }
 
-    function testUserCannotEvaluateNewsIfNotEvaluationTime() public {
+    function testUserCannotEvaluateContentIfNotEvaluationTime() public {
     }
 
-    function testGetFinalEvaluationAndTuneTrustLevelAndTrustToken() public shareNews {
+    function testGetFinalEvaluationAndTuneTrustLevelAndTrustToken() public shareContent {
         vm.prank(USERS[1]);
-        newsEvaluation.evaluateNews(newsId, true, 100);
+        contentEvaluation.evaluateContent(contentId, true, 100);
         vm.prank(USERS[2]);
-        newsEvaluation.evaluateNews(newsId, true, 80);
+        contentEvaluation.evaluateContent(contentId, true, 80);
         vm.prank(USERS[3]);
-        newsEvaluation.evaluateNews(newsId, false, 70);
+        contentEvaluation.evaluateContent(contentId, false, 70);
         vm.prank(USERS[4]);
-        newsEvaluation.evaluateNews(newsId, false, 80);
+        contentEvaluation.evaluateContent(contentId, false, 80);
 
-        vm.startPrank(address(newsEvaluation));
+        vm.startPrank(address(contentEvaluation));
         vm.warp(deadline*2);
 
-        (string memory response, bool evaluation, uint confidence, bool valid) = newsEvaluation.closeNewsValidation(newsId);
+        (string memory response, bool evaluation, uint confidence, bool valid) = contentEvaluation.closeContentValidation(contentId);
         
         console.log("Response: ", response);
         console.log("Evaluation: %s, Confidence: %s, Valid: %s", evaluation, confidence, valid);
@@ -79,7 +79,7 @@ contract NewsEvaluationTest is Test {
         }
 
         console.log("FUNDS TRS: %s", trustToken.getFundsTRS());
-        console.log("NewsEvaluation TRS: %s", trustToken.balanceOf(address(newsEvaluation)));
+        console.log("ContentEvaluation TRS: %s", trustToken.balanceOf(address(contentEvaluation)));
 
         assertEq(trustToken.getTrustLevel(USERS[0]), 51);
         assertEq(trustToken.getTrustLevel(USERS[1]), 51);
@@ -92,7 +92,7 @@ contract NewsEvaluationTest is Test {
         assertEq(trustToken.balanceOf(USERS[2]), 542);
         assertEq(trustToken.balanceOf(USERS[3]), 430);
         assertEq(trustToken.balanceOf(USERS[4]), 420);
-        assertEq(trustToken.balanceOf(address(newsEvaluation)), 0);
+        assertEq(trustToken.balanceOf(address(contentEvaluation)), 0);
         assertEq(trustToken.getFundsTRS(), 0);
 
         vm.stopPrank();

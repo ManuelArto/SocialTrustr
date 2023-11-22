@@ -3,14 +3,14 @@ pragma solidity ^0.8.21;
 
 
 library Errors {
-    error NewsSharing_NoParentNewsWithThatId();
+    error ContentSharing_NoParentContentWithThatId();
 
-    error NewsEvaluation_InvalidNewsId();
-    error NewsEvaluation_NewsValidationPeriodEnded();
-    error NewsEvaluation_CannotEvaluateForwardedNews();
-    error NewsEvaluation_UpkeepNotNeeded();
-    error NewsEvaluation_AlreadyVoted();
-    error NewsEvaluation_AuthorCannotVote();
+    error ContentEvaluation_InvalidContentId();
+    error ContentEvaluation_ContentValidationPeriodEnded();
+    error ContentEvaluation_CannotEvaluateForwardedContent();
+    error ContentEvaluation_UpkeepNotNeeded();
+    error ContentEvaluation_AlreadyVoted();
+    error ContentEvaluation_AuthorCannotVote();
 
     error TrustToken_UserAlreadyHasBadge();
     error TrustToken_NotEnoughETH(uint);

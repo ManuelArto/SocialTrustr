@@ -11,18 +11,18 @@ library TokenAndTrustLevelTuning {
     /**
      * @dev Returns the stake to the sharer and evaluators.
      * @param _sharer The address of the sharer.
-     * @param _newsValidation The memory reference to the news validation data.
+     * @param _contentValidation The memory reference to the content validation data.
      * @param _trustToken The instance of the TrustToken contract.
      */
     function returnStake(
         address _sharer,
-        DataTypes.NewsValidation memory _newsValidation,
+        DataTypes.ContentValidation memory _contentValidation,
         TrustToken _trustToken
     ) internal {
         _trustToken.unstakeTRS(_sharer, _trustToken.TRS_FOR_SHARING());
 
         // evaluators
-        DataTypes.Evaluation[] memory evaluations = _newsValidation.evaluations;
+        DataTypes.Evaluation[] memory evaluations = _contentValidation.evaluations;
         for (uint i = 0; i < evaluations.length; i++) {
             _trustToken.unstakeTRS(
                 evaluations[i].evaluator,
@@ -32,35 +32,35 @@ library TokenAndTrustLevelTuning {
     }
 
     /**
-     * @dev Tunes the trust level and trust token based on the news validation.
+     * @dev Tunes the trust level and trust token based on the content validation.
      * @param _sharer The address of the sharer.
-     * @param _newsValidation The memory reference to the news validation data.
+     * @param _contentValidation The memory reference to the content validation data.
      * @param _trustToken The instance of the TrustToken contract.
      */
     function tuneTrustLevelAndTrustToken(
         address _sharer,
-        DataTypes.NewsValidation memory _newsValidation,
+        DataTypes.ContentValidation memory _contentValidation,
         TrustToken _trustToken
     ) internal {
-        uint entropy = calculateEntropy(_newsValidation);
+        uint entropy = calculateEntropy(_contentValidation);
         console.log("Entropy: ", entropy);
         calculateRewardsAndPunishments(
             _sharer,
-            _newsValidation,
+            _contentValidation,
             _trustToken,
             entropy
         );
     }
 
     /**
-     * @dev Calculates the entropy of the news validation.
-     * @param _newsValidation The memory reference to the news validation data.
+     * @dev Calculates the entropy of the content validation.
+     * @param _contentValidation The memory reference to the content validation data.
      * @return entropy The entropy value.
      */
     function calculateEntropy(
-        DataTypes.NewsValidation memory _newsValidation
+        DataTypes.ContentValidation memory _contentValidation
     ) internal pure returns (uint entropy) {
-        (uint[3] memory probabilities, uint length) = getProbabilities(_newsValidation);
+        (uint[3] memory probabilities, uint length) = getProbabilities(_contentValidation);
 
         // * 1e16 instead of 1e18 because should be in range 0-1 instead of 0-100
         int multiplier = 1e16;
@@ -84,9 +84,9 @@ library TokenAndTrustLevelTuning {
     }
 
     /**
-     * @dev Calculates rewards and punishments for a news validation.
+     * @dev Calculates rewards and punishments for a content validation.
      * @param _sharer The address of the sharer.
-     * @param _newsValidation The memory reference to the news validation data.
+     * @param _contentValidation The memory reference to the content validation data.
      * @param _trustToken The instance of the TrustToken contract.
      * @param entropy The entropy value used in the calculations.
      * 
@@ -100,12 +100,12 @@ library TokenAndTrustLevelTuning {
     */
     function calculateRewardsAndPunishments(
         address _sharer,
-        DataTypes.NewsValidation memory _newsValidation,
+        DataTypes.ContentValidation memory _contentValidation,
         TrustToken _trustToken,
         uint entropy
     ) internal {
-        DataTypes.FinalEvaluation memory finalEvaluation = _newsValidation.finalEvaluation;
-        DataTypes.Evaluation[] memory evaluations = _newsValidation.evaluations;
+        DataTypes.FinalEvaluation memory finalEvaluation = _contentValidation.finalEvaluation;
+        DataTypes.Evaluation[] memory evaluations = _contentValidation.evaluations;
 
         uint totalConfidence = 0;
         uint trsPunishments;
@@ -217,7 +217,7 @@ library TokenAndTrustLevelTuning {
     ) internal {
         uint totalTrsRewarded = 0;
 
-        // Sharer Reward only if true news
+        // Sharer Reward only if true content
         if (_finalEvaluation) {
             totalConfidence += 100;
             uint trsReward = (100 * _trsPunishment) / totalConfidence;
@@ -236,7 +236,7 @@ library TokenAndTrustLevelTuning {
         }
 
         // TODO Decide what to do with remaming TRS:
-            // 1. Redirect the remaining TRS reward to the Sharer if true news OR to funds
+            // 1. Redirect the remaining TRS reward to the Sharer if true content OR to funds
             // 2. Add decimals to TRS Token
 
         if (_finalEvaluation) {
@@ -248,15 +248,15 @@ library TokenAndTrustLevelTuning {
 
 
     /**
-     * @dev Calculates the probabilities for news validation
-     * @param _newsValidation The NewsValidation struct
+     * @dev Calculates the probabilities for content validation
+     * @param _contentValidation The ContentValidation struct
      * @return probabilities The array of probabilities [p1, p2, p3]
      * @return length The length of the probabilities array
      */
     function getProbabilities(
-        DataTypes.NewsValidation memory _newsValidation
+        DataTypes.ContentValidation memory _contentValidation
     ) internal pure returns (uint[3] memory probabilities, uint length) {
-        DataTypes.Evaluation[] memory evaluations = _newsValidation.evaluations;
+        DataTypes.Evaluation[] memory evaluations = _contentValidation.evaluations;
 
         for (uint i = 0; i < evaluations.length; i++) {
             if (evaluations[i].evaluation) {

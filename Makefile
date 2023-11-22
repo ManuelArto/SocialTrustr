@@ -13,9 +13,9 @@ DEFAULT_GANACHE_KEY := 0x6377edc0e87761edad999e3cb2e0c17cf82c096dffa37ce3c55ddc0
 
 help:
 	@echo "Usage:"
-	@echo "  make deploy [ARGS=...]\n    example: make deploy ARGS=\"--network sepolia\""
+	@echo "  make deploy [NETWORK_ARGS=...]\n    example: make deploy NETWORK_ARGS=\"--network sepolia\""
 	@echo ""
-	@echo "  make shareNews [ARGS=...]\n    example: make shareNews ARGS=\"--network sepolia\""
+	@echo "  make shareContent [ARGS=...]\n    example: make shareContent ARGS='Title ipfsCID ChatName 0'"
 
 all: clean install update build
 
@@ -49,28 +49,28 @@ endif
 deploy:
 	@forge script script/DeployScript.s.sol:DeployScript $(NETWORK_ARGS)
 
-# NEWS SHARING
-shareNews:
-	@forge script script/InteractionsNewsSharing.s.sol:NewsSharingInteractions --sig "shareNews(string, string, string, uint)" $(ARGS) $(NETWORK_ARGS)
+# CONTENT SHARING
+shareContent:
+	@forge script script/InteractionsContentSharing.s.sol:ContentSharingInteractions --sig "shareContent(string, string, string, uint)" $(ARGS) $(NETWORK_ARGS)
 
-getNews:
-	@forge script script/InteractionsNewsSharing.s.sol:NewsSharingInteractions --sig "getNews(uint)" $(ARGS) $(NETWORK_ARGS)
+getContent:
+	@forge script script/InteractionsContentSharing.s.sol:ContentSharingInteractions --sig "getContent(uint)" $(ARGS) $(NETWORK_ARGS)
 
-getTotalNews:
-	@forge script script/InteractionsNewsSharing.s.sol:NewsSharingInteractions --sig "getTotalNews()" $(NETWORK_ARGS)
+getTotalContents:
+	@forge script script/InteractionsContentSharing.s.sol:ContentSharingInteractions --sig "getTotalContents()" $(NETWORK_ARGS)
 
-# NEWS EVALUATION
-evaluateNews:
-	@forge script script/InteractionsNewsEvaluation.s.sol:NewsEvaluationInteractions --sig "evaluateNews(uint, bool, uint)" $(ARGS) $(NETWORK_ARGS)
+# CONTENT EVALUATION
+evaluateContent:
+	@forge script script/InteractionsContentEvaluation.s.sol:ContentEvaluationInteractions --sig "evaluateContent(uint, bool, uint)" $(ARGS) $(NETWORK_ARGS)
 
-getNewsValidation:
-	@forge script script/InteractionsNewsEvaluation.s.sol:NewsEvaluationInteractions --sig "getNewsValidation(uint)" $(ARGS) $(NETWORK_ARGS)
+getContentValidation:
+	@forge script script/InteractionsContentEvaluation.s.sol:ContentEvaluationInteractions --sig "getContentValidation(uint)" $(ARGS) $(NETWORK_ARGS)
 
-closeNewsValidation:
-	@forge script script/InteractionsNewsEvaluation.s.sol:NewsEvaluationInteractions --sig "closeNewsValidation(uint)" $(ARGS) $(NETWORK_ARGS)
+closeContentValidation:
+	@forge script script/InteractionsContentEvaluation.s.sol:ContentEvaluationInteractions --sig "closeContentValidation(uint)" $(ARGS) $(NETWORK_ARGS)
 
-checkNewsValidation:
-	@forge script script/InteractionsNewsEvaluation.s.sol:NewsEvaluationInteractions --sig "checkNewsValidation(uint)" $(ARGS) $(NETWORK_ARGS)
+checkContentValidation:
+	@forge script script/InteractionsContentEvaluation.s.sol:ContentEvaluationInteractions --sig "checkContentValidation(uint)" $(ARGS) $(NETWORK_ARGS)
 
 # TRUST TOKEN
 buyBadge:

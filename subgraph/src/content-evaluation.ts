@@ -1,9 +1,9 @@
-import { NewsEvaluated as NewsEvaluatedEvent } from "../generated/NewsEvaluation/NewsEvaluation"
+import { ContentEvaluated as ContentEvaluatedEvent } from "../generated/ContentEvaluation/ContentEvaluation"
 import { Evaluation } from "../generated/schema"
 import { EvaluationStatus } from "./model/evaluation-status"
 
 
-export function handleNewsEvaluated(event: NewsEvaluatedEvent): void {
+export function handleContentEvaluated(event: ContentEvaluatedEvent): void {
     let evaluation = Evaluation.load(event.params.id.toString())
     if (evaluation == null) {
         return;

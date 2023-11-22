@@ -2,32 +2,32 @@
 pragma solidity ^0.8.21;
 
 import {Script, console} from "forge-std/Script.sol";
-import {NewsEvaluation} from "../src/NewsEvaluation.sol";
+import {ContentEvaluation} from "../src/ContentEvaluation.sol";
 import {DevOpsTools} from "../lib/foundry-devops/src/DevOpsTools.sol";
 import "../src/libraries/types/DataTypes.sol";
 
-contract NewsEvaluationInteractions is Script {
-    function evaluateNews(
+contract ContentEvaluationInteractions is Script {
+    function evaluateContent(
         address _contract,
-        uint newsId,
+        uint contentId,
         bool evaluation,
         uint confidence
     ) public startBroadcast {
-        NewsEvaluation newsEvaluation = NewsEvaluation(payable(_contract));
-        newsEvaluation.evaluateNews(newsId, evaluation, confidence);
+        ContentEvaluation contentEvaluation = ContentEvaluation(payable(_contract));
+        contentEvaluation.evaluateContent(contentId, evaluation, confidence);
     }
 
-    function getNewsValidation(
+    function getContentValidation(
         address _contract,
-        uint newsId
+        uint contentId
     ) public startBroadcast returns (
         DataTypes.EvaluationStatus status,
         DataTypes.FinalEvaluation memory finalEvaluation,
         uint evaluationsCount
     ) {
-        NewsEvaluation newsEvaluation = NewsEvaluation(payable(_contract));
-        (status, finalEvaluation, evaluationsCount) = newsEvaluation
-            .getNewsValidation(newsId);
+        ContentEvaluation contentEvaluation = ContentEvaluation(payable(_contract));
+        (status, finalEvaluation, evaluationsCount) = contentEvaluation
+            .getContentValidation(contentId);
 
         console.log("Status: %s", uint(status));
         console.log(
@@ -38,17 +38,17 @@ contract NewsEvaluationInteractions is Script {
         console.log("Evaluations Count: %s", evaluationsCount);
     }
 
-    function closeNewsValidation(
+    function closeContentValidation(
         address _contract,
-        uint newsId
+        uint contentId
     ) public startBroadcast {
-        NewsEvaluation newsEvaluation = NewsEvaluation(payable(_contract));
+        ContentEvaluation contentEvaluation = ContentEvaluation(payable(_contract));
         (
             string memory response,
             bool evaluation,
             uint confidence,
             bool valid
-        ) = newsEvaluation.closeNewsValidation(newsId);
+        ) = contentEvaluation.closeContentValidation(contentId);
 
         console.log("Response: %s", response);
         console.log("Evaluation: %s", evaluation);
@@ -56,57 +56,57 @@ contract NewsEvaluationInteractions is Script {
         console.log("Valid: %s", valid);
     }
 
-    function checkNewsValidation(
+    function checkContentValidation(
         address _contract,
-        uint newsId
+        uint contentId
     ) public startBroadcast {
-        NewsEvaluation newsEvaluation = NewsEvaluation(payable(_contract));
-        bool closingNews = newsEvaluation.checkNewsValidation(newsId);
-        console.log("Closing News: %s", closingNews);
+        ContentEvaluation contentEvaluation = ContentEvaluation(payable(_contract));
+        bool closingContent = contentEvaluation.checkContentValidation(contentId);
+        console.log("Closing Content: %s", closingContent);
     }
 
     /* OVERLOAD FUNCTIONS */
 
-    function evaluateNews(
-        uint newsId,
+    function evaluateContent(
+        uint contentId,
         bool evaluation,
         uint confidence
     ) external {
-        evaluateNews(
-            getNewsEvaluationContract(),
-            newsId,
+        evaluateContent(
+            getContentEvaluationContract(),
+            contentId,
             evaluation,
             confidence
         );
     }
 
-    function getNewsValidation(
-        uint newsId
+    function getContentValidation(
+        uint contentId
     ) external returns (
         DataTypes.EvaluationStatus status,
         DataTypes.FinalEvaluation memory finalEvaluation,
         uint evaluationsCount
     ) {
-        return getNewsValidation(getNewsEvaluationContract(), newsId);
+        return getContentValidation(getContentEvaluationContract(), contentId);
     }
 
-    function closeNewsValidation(
-        uint newsId
+    function closeContentValidation(
+        uint contentId
     ) public {
-        closeNewsValidation(getNewsEvaluationContract(), newsId);
+        closeContentValidation(getContentEvaluationContract(), contentId);
     } 
 
-    function checkNewsValidation(
-        uint newsId
+    function checkContentValidation(
+        uint contentId
     ) public {
-        checkNewsValidation(getNewsEvaluationContract(), newsId);
+        checkContentValidation(getContentEvaluationContract(), contentId);
     }         
 
     /* INTERNAL FUNCTIONS */
 
-    function getNewsEvaluationContract() internal returns (address) {
+    function getContentEvaluationContract() internal returns (address) {
         address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment(
-            "NewsEvaluation",
+            "ContentEvaluation",
             block.chainid
         );
         return mostRecentlyDeployed;

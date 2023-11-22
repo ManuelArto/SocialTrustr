@@ -1,10 +1,10 @@
 {
   "mainnet": {
-    "NewsSharing": {
+    "ContentSharing": {
       "address": "",
       "startBlock": 0
     },
-    "NewsEvaluation": {
+    "ContentEvaluation": {
       "address": "",
       "startBlock": 0
     }

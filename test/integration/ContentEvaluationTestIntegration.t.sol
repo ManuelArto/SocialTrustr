@@ -5,15 +5,15 @@ pragma solidity ^0.8.21;
 import {Test, console} from "forge-std/Test.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
 import {DeployScript} from "../../script/DeployScript.s.sol";
-import {NewsEvaluationInteractions} from "../../script/InteractionsNewsEvaluation.s.sol";
-import {NewsEvaluation} from "../../src/NewsEvaluation.sol";
-import {NewsSharing} from "../../src/NewsSharing.sol";
+import {ContentEvaluationInteractions} from "../../script/InteractionsContentEvaluation.s.sol";
+import {ContentEvaluation} from "../../src/ContentEvaluation.sol";
+import {ContentSharing} from "../../src/ContentSharing.sol";
 import {TrustToken} from "../../src/TrustToken.sol";
 import "../../src/libraries/types/DataTypes.sol";
 
 contract IntegrationsTest is StdCheats, Test {
-    NewsEvaluation newsEvaluation;
-    NewsSharing newsSharing;
+    ContentEvaluation contentEvaluation;
+    ContentSharing contentSharing;
     TrustToken trustToken;
 
     string public constant TITLE = "TITLE";
@@ -25,13 +25,13 @@ contract IntegrationsTest is StdCheats, Test {
 
     function setUp() external {
         DeployScript deployer = new DeployScript();
-        (newsSharing, newsEvaluation, trustToken, ) = deployer.run();
+        (contentSharing, contentEvaluation, trustToken, ) = deployer.run();
         trustToken.buyBadge{value: trustToken.getBadgePrice()}();
     }
 
-    uint newsId;
-    modifier shareNews() {
-        newsId = newsSharing.createNews(TITLE, IPFSCID, CHATNAME, 0);
+    uint contentId;
+    modifier shareContent() {
+        contentId = contentSharing.createContent(TITLE, IPFSCID, CHATNAME, 0);
         _;
     }
 
@@ -42,15 +42,15 @@ contract IntegrationsTest is StdCheats, Test {
         _;
     }
 
-    function testUserCanEvaluateAndGetNewsValidation() public getBadge shareNews  {
-        NewsEvaluationInteractions newsEvaluationInteractions = new NewsEvaluationInteractions();
+    function testUserCanEvaluateAndGetContentValidation() public getBadge shareContent  {
+        ContentEvaluationInteractions contentEvaluationInteractions = new ContentEvaluationInteractions();
 
-        newsEvaluationInteractions.evaluateNews(address(newsEvaluation), newsId, EVALUATION, CONFIDENCE);
+        contentEvaluationInteractions.evaluateContent(address(contentEvaluation), contentId, EVALUATION, CONFIDENCE);
         (
             DataTypes.EvaluationStatus status,
             DataTypes.FinalEvaluation memory finalEvaluation,
             uint evaluationsCount
-        ) = newsEvaluationInteractions.getNewsValidation(address(newsEvaluation), newsId);
+        ) = contentEvaluationInteractions.getContentValidation(address(contentEvaluation), contentId);
 
         assertEq(uint(status), uint(DataTypes.EvaluationStatus.Evaluating));
         assertEq(finalEvaluation.evaluation, false);

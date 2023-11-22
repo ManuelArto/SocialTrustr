@@ -3,14 +3,14 @@ pragma solidity ^0.8.21;
 
 import {Script, console} from "forge-std/Script.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
-import {NewsSharing} from "../src/NewsSharing.sol";
-import {NewsEvaluation} from "../src/NewsEvaluation.sol";
+import {ContentSharing} from "../src/ContentSharing.sol";
+import {ContentEvaluation} from "../src/ContentEvaluation.sol";
 import {TrustToken} from "../src/TrustToken.sol";
 
 contract DeployScript is Script {
     function run() external returns (
-        NewsSharing newsSharing,
-        NewsEvaluation newsEvaluation,
+        ContentSharing contentSharing,
+        ContentEvaluation contentEvaluation,
         TrustToken trustToken,
         HelperConfig helperConfig
     ) {
@@ -19,13 +19,13 @@ contract DeployScript is Script {
 
         vm.startBroadcast();
         trustToken = new TrustToken(ethUsdPriceeFeed);
-        newsSharing = new NewsSharing(trustToken);
-        newsEvaluation = new NewsEvaluation(trustToken, deadline);
-        // Add NewsSharing contract to NewsEvaluation
-        newsEvaluation.setNewsSharingContract(newsSharing);
+        contentSharing = new ContentSharing(trustToken);
+        contentEvaluation = new ContentEvaluation(trustToken, deadline);
+        // Add ContentSharing contract to ContentEvaluation
+        contentEvaluation.setContentSharingContract(contentSharing);
         // Add admins to TrustToken and remove this contract
-        trustToken.addAdmin(address(newsSharing));
-        trustToken.addAdmin(address(newsEvaluation));
+        trustToken.addAdmin(address(contentSharing));
+        trustToken.addAdmin(address(contentEvaluation));
         trustToken.removeAdmin(address(this));
         vm.stopBroadcast();
     }

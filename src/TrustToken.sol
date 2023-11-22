@@ -100,7 +100,7 @@ contract TrustToken is ERC20 {
     }
 
     /**
-     * @dev Stake the amount of TRS tokens. Removed or given back after News Validation. Only for admins.
+     * @dev Stake the amount of TRS tokens. Removed or given back after Content Validation. Only for admins.
      * @param user The address of the user staking TRS tokens.
      * @param amount The amount of TRS tokens to stake.
      */
