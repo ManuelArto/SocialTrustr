@@ -74,42 +74,40 @@ contract ContentEvaluation is Ownable {
     }
 
     function closeContentValidation(uint contentId) external validContent(contentId) returns (string memory response, bool evaluation, uint confidence, bool valid) {
+        // Check if content is still in the validation period
         bool isUpkeepNeeded = checkContentValidation(contentId);
         if (!isUpkeepNeeded) {
             revert Errors.ContentEvaluation_UpkeepNotNeeded();
         }
         
         DataTypes.ContentValidation storage validation = s_contentValidations[contentId];
+        address sharer = s_contentSharing.getSharerOf(contentId);
+        uint evaluations = validation.evaluations.length;
         uint trustedUsers = i_trustToken.s_trustedUsers();
 
         // Check if there are enough evaluations to make a decision
-        if (trustedUsers <= 1 || (validation.evaluations.length < trustedUsers / 2)) {
+        if (trustedUsers <= 1 || (evaluations < trustedUsers / 2)) {
+            TokenAndTrustLevelTuning.returnStake(sharer, validation, i_trustToken);
             validation.status = DataTypes.EvaluationStatus.NotVerified_NotEnoughVotes;
-            TokenAndTrustLevelTuning.returnStake(s_contentSharing.getSharerOf(contentId), validation, i_trustToken);
 
-            emit Events.ContentEvaluated(contentId, validation.status, false, 0, validation.evaluations.length);
+            emit Events.ContentEvaluated(contentId, validation.status, false, 0, evaluations);
             return ("Evaluation failed: Not enough votes", false, 0, false);
         }
 
         (evaluation, confidence, valid) = ContentEvaluationCalculator.getFinalEvaluation(validation, i_trustToken);
-        console.log("Evaluation: ", evaluation);
-        console.log("Confidence: ", confidence);
-        console.log("Valid: ", valid);
-        
-        // Check if the evaluation is valid
         if (!valid) {
-            TokenAndTrustLevelTuning.returnStake(s_contentSharing.getSharerOf(contentId), validation, i_trustToken);
+            TokenAndTrustLevelTuning.returnStake(sharer, validation, i_trustToken);
             validation.status = DataTypes.EvaluationStatus.NotVerified_EvaluationEndedInATie;
 
-            emit Events.ContentEvaluated(contentId, validation.status, false, 0, validation.evaluations.length);
+            emit Events.ContentEvaluated(contentId, validation.status, false, 0, evaluations);
             return ("Evaluation failed: Tie", false, 0, valid);
         }
 
         validation.finalEvaluation = DataTypes.FinalEvaluation(evaluation, confidence);
         validation.status = DataTypes.EvaluationStatus.Evaluated;
-        TokenAndTrustLevelTuning.tuneTrustLevelAndTrustToken(s_contentSharing.getSharerOf(contentId), validation, i_trustToken);
+        TokenAndTrustLevelTuning.tuneTrustLevelAndTrustToken(sharer, validation, i_trustToken);
 
-        emit Events.ContentEvaluated(contentId, validation.status, evaluation, confidence, validation.evaluations.length);
+        emit Events.ContentEvaluated(contentId, validation.status, evaluation, confidence, evaluations);
         return ("Evaluated", evaluation, confidence, valid);
     }
 

@@ -31,10 +31,15 @@ contract ContentSharing is Ownable {
 
         i_trustToken.stakeTRS(msg.sender, i_trustToken.TRS_FOR_SHARING());
 
-        DataTypes.Content memory content = DataTypes.Content(title, ipfsCid, chatName, msg.sender, parentId != 0, block.timestamp);
+        DataTypes.Content memory content = DataTypes.Content(
+            title,
+            ipfsCid,
+            chatName,
+            msg.sender,
+            parentId != 0,
+            block.timestamp
+        );
         s_content.push(content);
-
-        // TODO: trigger evaluate content automatic function
 
         id = s_content.length - 1;
         emit Events.ContentCreated(id, msg.sender, title, ipfsCid, chatName, parentId);

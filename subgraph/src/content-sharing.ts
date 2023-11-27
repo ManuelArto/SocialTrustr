@@ -18,7 +18,7 @@ export function handleContentCreated(event: ContentCreatedEvent): void {
     updateParentForwardedContent(content, event.params.parentContent)
     content.parentContent = event.params.parentContent.toString()
     // Link to parent content evaluation
-    content.evaluation = Content.load(content.parentContent!)!.evaluation;
+    content.evaluation = Content.load(content.parentContent!)!.evaluation
   } else {
     content.parentContent = "0"
     content.evaluation = createInitialEvaluation(event).id
@@ -43,9 +43,9 @@ function updateParentForwardedContent(content: Content, parentId: BigInt): void 
 
 
 function createInitialEvaluation(event: ContentCreatedEvent): Evaluation {
-  let evaluation = new Evaluation(event.params.id.toString());
+  let evaluation = new Evaluation(event.params.id.toString())
   evaluation.status = EvaluationStatus.Evaluating
 
   evaluation.save()
-  return evaluation;
+  return evaluation
 }
