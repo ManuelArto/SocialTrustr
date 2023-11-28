@@ -86,7 +86,7 @@ contract ContentEvaluation is Ownable {
         uint trustedUsers = i_trustToken.s_trustedUsers();
 
         // Check if there are enough evaluations to make a decision
-        if (trustedUsers <= 1 || (evaluations < trustedUsers / 2)) {
+        if (trustedUsers <= 1 || (evaluations <= trustedUsers / 2)) {
             TokenAndTrustLevelTuning.returnStake(sharer, validation, i_trustToken);
             validation.status = DataTypes.EvaluationStatus.NotVerified_NotEnoughVotes;
 
