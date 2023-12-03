@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 def custom_round(x, prec=2, base=.1):
     return round(base * round(float(x)/base),prec)
 
-def monte_carlo_simulation(num_trusted, num_iterations, stake_valutazione, stake_condivisione):
+def monte_carlo_simulation(num_trusted, num_iterations, stake_valutazione, stake_condivisione, reset=False):
     trustlevels = np.full(num_trusted, 50.0)
     trs_tokens = np.full(num_trusted, 500.0)
 
@@ -25,9 +25,9 @@ def monte_carlo_simulation(num_trusted, num_iterations, stake_valutazione, stake
 
         evaluators = np.setdiff1d(np.arange(NUM_TRUSTED), sharer)
 
-        # Simulazione di valutazioni basate sulla affidabilità dello sharer
-        sharer_reliability = trustlevels[sharer] / 100.0
-        confidence_scores = np.random.uniform(0.4, 1.0, len(evaluators))
+        # Simulazione di valutazioni pseudo realistiche
+        # sharer_reliability = trustlevels[sharer] / 100.0
+        confidence_scores = np.random.uniform(0.4, 1.1, len(evaluators))
         correct_evaluation = np.random.choice([True, False], len(evaluators), p=[0.7, 0.3])
 
         # Check if evaluators have enough tokens for the evaluation
@@ -67,6 +67,9 @@ def monte_carlo_simulation(num_trusted, num_iterations, stake_valutazione, stake
                 probs[i] = probs[i] / np.sum(probs)
                 entropy += -(probs[i] * np.log2(probs[i]))
         entropy /= np.log2(3)
+
+
+        # Calcolo Ricompense e Penalizzazioni
 
         if not CONTENT_EVALUATION:
             correct_evaluation = np.logical_not(correct_evaluation)
@@ -116,9 +119,14 @@ def monte_carlo_simulation(num_trusted, num_iterations, stake_valutazione, stake
         # calculate gain/loss delta of previous trustlevels for each entropy range
         diff = abs(trust_levels_history[-1] - trust_levels_history[-2])
         entropy_gain_losses_history[custom_round(entropy)].append(np.sum(diff))
-        
+
+        if reset:
+            trustlevels = np.full(num_trusted, 50.0)
+            trs_tokens = np.full(num_trusted, 500.0)
+            trust_levels_history = [np.copy(trustlevels)]
+            token_trs_history = [np.copy(trs_tokens)]
+
         iterations += 1
-        
 
     return trust_levels_history, token_trs_history, entropy_gain_losses_history, iterations
 
@@ -160,12 +168,18 @@ NUM_ITERATIONS = 200
 STAKE_VALUTAZIONE = 10
 STAKE_CONDIVISIONE = 20
 M = 2.5  # Costante per la ricompensa
+plt.rcParams.update({'font.size': 24})
 
-trust_levels_history, token_trs_history, entropy_gain_losses_history, iterations = monte_carlo_simulation(
+
+# Entropy => ripetizioni
+_, _, entropy_gain_losses_history, _ = monte_carlo_simulation(
+    NUM_TRUSTED, 10000, STAKE_VALUTAZIONE, STAKE_CONDIVISIONE, True
+)
+plot_entropy_delta_boxplot(entropy_gain_losses_history)
+
+# TrustLevel e Token TRS => iterazioni
+trust_levels_history, token_trs_history, _, iterations = monte_carlo_simulation(
     NUM_TRUSTED, NUM_ITERATIONS, STAKE_VALUTAZIONE, STAKE_CONDIVISIONE
 )
-
-plt.rcParams.update({'font.size': 24})
-plot_entropy_delta_boxplot(entropy_gain_losses_history)
 plot_data(trust_levels_history, NUM_TRUSTED, iterations,  "Affidabilità")
 plot_data(token_trs_history, NUM_TRUSTED, iterations, "Token TRS")
