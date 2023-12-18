@@ -13,7 +13,7 @@ DEFAULT_GANACHE_KEY := 0x6377edc0e87761edad999e3cb2e0c17cf82c096dffa37ce3c55ddc0
 
 help:
 	@echo "Usage:"
-	@echo "  make deploy [NETWORK_ARGS=...]\n    example: make deploy NETWORK_ARGS=\"--network sepolia\""
+	@echo "  make deploy [NETWORK_ARGS=...]\n    example: make deploy NETWORK_ARGS=\"--network ganache\""
 	@echo ""
 	@echo "  make shareContent [ARGS=...]\n    example: make shareContent ARGS='Title ipfsCID ChatName 0'"
 
