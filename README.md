@@ -7,7 +7,7 @@ Thesis project, Computer Science UniBO 22/23
 
 SocialTrustr is a system designed to combat digital disinformation by leveraging blockchain technology with a game theory-based approach and decentralized reputation systems. The platform epitomizes the “wisdom of the crowd” philosophy by enabling each user to actively participate in content validation, incentivized to exhibit honest behavior through a consensus mechanism based on rewards. The decentralized nature and incentive systems based on entropy offer a robust alternative to traditional fact-checking practices, transforming every user into an active validator of online content integrity.
 
-If you want to know more, consult the project thesis file: [click here](tesi.pdf)
+If you want to know more, consult the project thesis [file](tesi.pdf) or the notes taken during the development on [notion](https://manuworks.notion.site/SocialTrustr-39ae07be954f42079c08c67b2321356b?pvs=74)
 
 # Technologies Used
 
@@ -37,6 +37,34 @@ A custom API built using The Graph allows for querying shared content, traceabil
 # System Architecture
 
 The architecture behind SocialTrustr is based on including all user interactions within the Smart Contracts on the Ethereum blockchain. The use of The Graph ensures that interactions are indexed and efficiently queriable. This combination allows for the transparent and immutable recording of actions taken within the platform while keeping the validating and sharing process decentralized.
+
+
+<details>
+	<summary>Schemas Overview</summary>
+	<table style="text-align: center;">
+		<tr>
+			<td>Storage and data flow</td>
+			<td>Badge/TRS purchase</td>
+		</tr>
+		<tr>
+			<td>
+				<img src="images/storage_dati.png" hspace="10">
+			</td>
+			<td>
+				<img src="images/badge_trs.png" hspace="10">
+			</td>
+		</tr>
+		<tr>
+			<td>Content validation flow</td>
+		</tr>
+		<tr>
+			<td>
+				<img src="images/flow_content_validation.png" hspace="10">
+			</td>
+		</tr>
+	</table>
+</details>
+
 
 # How to run
 
